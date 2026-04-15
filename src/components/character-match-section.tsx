@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -210,6 +211,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
   const ui = getCopy(locale).resultUi;
   const [result, setResult] = useState<CastingResult | null>(null);
   const [fileName, setFileName] = useState("uploaded-face.jpg");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [genderPreference, setGenderPreference] = useState<GenderPreference | null>(null);
@@ -229,6 +231,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
           if (!cancelled) {
             setResult(snapshot.result);
             setFileName(snapshot.fileName);
+            setPreviewUrl(snapshot.imageDataUrl ?? null);
             setGenderPreference(snapshot.genderPreference ?? null);
             setIsLoading(false);
           }
@@ -244,6 +247,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
       const storedGender =
         (window.sessionStorage.getItem(UPLOADED_FACE_GENDER_KEY) as GenderPreference | null) ??
         null;
+      setPreviewUrl(imageDataUrl ?? null);
       setGenderPreference(storedGender);
 
       if (!imageDataUrl) {
@@ -307,9 +311,10 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
       fileName,
       result,
       genderPreference: genderPreference ?? undefined,
+      imageDataUrl: previewUrl ?? undefined,
     });
     return `${window.location.origin}/${locale}/result?share=${encodeURIComponent(snapshot)}`;
-  }, [fileName, genderPreference, locale, result]);
+  }, [fileName, genderPreference, locale, previewUrl, result]);
 
   if (isLoading) {
     return (
@@ -363,8 +368,26 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
       </div>
 
       <div className="grid gap-5 p-6 sm:p-8 lg:grid-cols-[1.2fr_0.8fr]">
-        {/* 왼쪽: 메인 캐릭터 + 서브 캐릭터 */}
+        {/* 왼쪽: 내 사진 + 메인 캐릭터 + 서브 캐릭터 */}
         <div className="space-y-5">
+          {/* 원본 사진 */}
+          {previewUrl && (
+            <div className="overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-sm">
+              <div className="relative aspect-[4/3] w-full">
+                <Image
+                  src={previewUrl}
+                  alt="업로드한 사진"
+                  fill
+                  className="object-cover object-top"
+                  unoptimized
+                />
+              </div>
+              <div className="px-5 py-3">
+                <p className="text-xs text-slate-400 truncate">{fileName}</p>
+              </div>
+            </div>
+          )}
+
           <ResultCard copy={copy} result={result} />
 
           <div className="rounded-[1.9rem] border border-violet-100 bg-[linear-gradient(180deg,#faf7ff_0%,#ffffff_100%)] p-5">

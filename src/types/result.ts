@@ -70,4 +70,5 @@ export type ShareSnapshot = {
   fileName: string;
   result: CastingResult;
   genderPreference?: GenderPreference;
+  imageDataUrl?: string;
 };

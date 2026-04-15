@@ -49,6 +49,12 @@ export default async function Home({
             >
               {copy.home.startTest}
             </Link>
+            <Link
+              href={`/${locale}/about`}
+              className="inline-flex items-center justify-center rounded-full border border-cyan-200 bg-cyan-50 px-6 py-3 text-sm font-semibold text-cyan-800 transition hover:border-cyan-300 hover:bg-cyan-100"
+            >
+              {copy.nav.about}
+            </Link>
             <a
               href="#notice"
               className="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:text-slate-950"
@@ -58,16 +64,36 @@ export default async function Home({
           </div>
         </div>
 
-        <aside className="rounded-[2.25rem] bg-slate-950 p-8 text-white shadow-[0_30px_100px_rgba(15,23,42,0.18)]">
-          <p className="text-sm font-semibold tracking-[0.2em] text-cyan-300">{copy.home.stepsTitle}</p>
-          <div className="mt-6 space-y-4">
-            {copy.home.steps.map((step, index) => (
-              <article key={step.title} className="rounded-[1.5rem] border border-white/10 bg-white/6 p-5">
-                <p className="text-sm text-cyan-200">STEP {index + 1}</p>
-                <h3 className="mt-2 text-xl font-semibold">{step.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-300">{step.description}</p>
-              </article>
-            ))}
+        <aside className="relative overflow-hidden rounded-[2.25rem] border border-slate-200/70 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.18),transparent_28%),linear-gradient(180deg,#dfe9f7_0%,#cfddee_100%)] p-8 shadow-[0_26px_90px_rgba(71,85,105,0.16)]">
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,transparent_34%,rgba(255,255,255,0.12)_100%)]" />
+          <div className="relative">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold tracking-[0.2em] text-sky-700">{copy.home.stepsTitle}</p>
+              <span className="rounded-full border border-white/60 bg-white/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+                flow
+              </span>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {copy.home.steps.map((step, index) => (
+                <div key={step.title}>
+                  <article className="rounded-[1.5rem] border border-white/65 bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(248,250,252,0.9)_100%)] p-5 shadow-[0_14px_34px_rgba(71,85,105,0.14)] backdrop-blur">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#0f172a_0%,#334155_100%)] text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,23,42,0.18)]">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-600">
+                          STEP {index + 1}
+                        </p>
+                        <h3 className="mt-2 text-xl font-semibold text-slate-950">{step.title}</h3>
+                        <p className="mt-3 text-sm leading-6 text-slate-600">{step.description}</p>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              ))}
+            </div>
           </div>
         </aside>
       </section>
@@ -82,6 +108,15 @@ export default async function Home({
             <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
           </article>
         ))}
+      </section>
+
+      <section className="mt-10 rounded-[2rem] border border-amber-100 bg-[linear-gradient(180deg,#fffaf3_0%,#ffffff_100%)] p-6 sm:p-8">
+        <p className="text-sm font-semibold tracking-[0.18em] text-amber-600">{copy.home.guideTitle}</p>
+        <ul className="mt-4 space-y-2 text-sm leading-7 text-slate-600">
+          {copy.home.guideItems.map((item) => (
+            <li key={item}>• {item}</li>
+          ))}
+        </ul>
       </section>
 
       <section id="notice" className="mt-10 rounded-[2rem] border border-slate-200 bg-slate-50/90 p-6 sm:p-8">

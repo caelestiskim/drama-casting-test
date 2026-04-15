@@ -6,6 +6,7 @@ import {
   type FaceLandmarkerResult,
 } from "@mediapipe/tasks-vision";
 
+import type { Locale } from "@/lib/i18n";
 import type { FaceValidationResult } from "@/types/result";
 
 let landmarkerPromise: Promise<FaceLandmarker> | null = null;
@@ -67,6 +68,7 @@ function checkFrontal(result: FaceLandmarkerResult) {
 
 export async function validateFaceImage(
   image: HTMLImageElement,
+  locale: Locale = "ko",
 ): Promise<FaceValidationResult> {
   try {
     const landmarker = await getFaceLandmarker();
@@ -77,7 +79,12 @@ export async function validateFaceImage(
       return {
         canProceed: false,
         status: "error",
-        message: "얼굴을 찾지 못했어요. 얼굴이 잘 보이는 사진으로 다시 올려 주세요.",
+        message:
+          locale === "en"
+            ? "We couldn't find a face. Please upload a clearer photo."
+            : locale === "ja"
+              ? "顔を見つけられませんでした。顔がよく見える写真でもう一度お試しください。"
+              : "얼굴을 찾지 못했어요. 얼굴이 잘 보이는 사진으로 다시 올려 주세요.",
         warnings: [],
         faceCount,
         confidence: 0,
@@ -89,7 +96,12 @@ export async function validateFaceImage(
       return {
         canProceed: false,
         status: "error",
-        message: "한 사람만 나온 사진으로 다시 올려 주세요.",
+        message:
+          locale === "en"
+            ? "Please upload a photo with just one person."
+            : locale === "ja"
+              ? "一人だけ写っている写真でお試しください。"
+              : "한 사람만 나온 사진으로 다시 올려 주세요.",
         warnings: [],
         faceCount,
         confidence: 0.5,
@@ -102,11 +114,23 @@ export async function validateFaceImage(
     const warnings: string[] = [];
 
     if (faceRatio < 0.12) {
-      warnings.push("얼굴이 조금 더 크게 나온 사진이면 결과가 더 안정적이에요.");
+      warnings.push(
+        locale === "en"
+          ? "A closer face crop will usually give a more stable result."
+          : locale === "ja"
+            ? "顔がもう少し大きく写っている写真のほうが結果が安定しやすいです。"
+            : "얼굴이 조금 더 크게 나온 사진이면 결과가 더 안정적이에요.",
+      );
     }
 
     if (!isFrontal) {
-      warnings.push("정면에 가까운 사진이면 캐릭터 결과가 더 자연스럽게 나와요.");
+      warnings.push(
+        locale === "en"
+          ? "A more front-facing photo usually makes the result feel more natural."
+          : locale === "ja"
+            ? "正面に近い写真のほうがキャラクター結果がより自然になります。"
+            : "정면에 가까운 사진이면 캐릭터 결과가 더 자연스럽게 나와요.",
+      );
     }
 
     return {
@@ -114,8 +138,16 @@ export async function validateFaceImage(
       status: warnings.length > 0 ? "warning" : "success",
       message:
         warnings.length > 0
-          ? "사진은 사용할 수 있어요. 다만 더 또렷한 사진이면 결과가 더 좋아질 수 있어요."
-          : "얼굴 확인이 끝났어요. 이 사진으로 진행해도 괜찮아요.",
+          ? locale === "en"
+            ? "This photo is usable, but a clearer one may improve the result."
+            : locale === "ja"
+              ? "この写真でも進めますが、もう少し鮮明な写真だと結果がさらに安定します。"
+              : "사진은 사용할 수 있어요. 다만 더 또렷한 사진이면 결과가 더 좋아질 수 있어요."
+          : locale === "en"
+            ? "Face check is complete. This photo is good to use."
+            : locale === "ja"
+              ? "顔チェックが終わりました。この写真でそのまま進めます。"
+              : "얼굴 확인이 끝났어요. 이 사진으로 진행해도 괜찮아요.",
       warnings,
       faceCount,
       confidence: Number((Math.min(1, faceRatio * 2.8) * (isFrontal ? 1 : 0.82)).toFixed(2)),
@@ -127,10 +159,23 @@ export async function validateFaceImage(
     return {
       canProceed: true,
       status: "warning",
-      message: "자동 점검은 이번에 건너뛰었어요. 결과는 그대로 볼 수 있어요.",
+      message:
+        locale === "en"
+          ? "We skipped the automatic photo check this time, but you can still continue."
+          : locale === "ja"
+            ? "今回は自動チェックをスキップしましたが、そのまま結果を見ることはできます。"
+            : "자동 점검은 이번에 건너뛰었어요. 결과는 그대로 볼 수 있어요.",
       warnings: [
-        "사진이 잘못된 건 아니에요.",
-        "브라우저 환경에 따라 이 단계가 가끔 생략될 수 있어요.",
+        locale === "en"
+          ? "Your photo is not necessarily the problem."
+          : locale === "ja"
+            ? "写真自体が問題というわけではありません。"
+            : "사진이 잘못된 건 아니에요.",
+        locale === "en"
+          ? "Depending on the browser, this step can occasionally be skipped."
+          : locale === "ja"
+            ? "ブラウザ環境によっては、この段階が省略されることがあります。"
+            : "브라우저 환경에 따라 이 단계가 가끔 생략될 수 있어요.",
       ],
       faceCount: 0,
       confidence: 0,
