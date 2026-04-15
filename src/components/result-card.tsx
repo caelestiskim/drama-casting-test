@@ -1,12 +1,13 @@
-import type { CharacterRecommendation, ResultCopy } from "@/types/result";
+import type { CastingResult, ResultCopy } from "@/types/result";
 
 type ResultCardProps = {
   copy: ResultCopy;
-  recommendation: CharacterRecommendation;
+  result: CastingResult;
 };
 
-export function ResultCard({ copy, recommendation }: ResultCardProps) {
-  const main = recommendation.main.character;
+export function ResultCard({ copy, result }: ResultCardProps) {
+  const main = result.main.character;
+  const matchScore = result.main.matchScore;
 
   return (
     <article className="relative overflow-hidden rounded-[2rem] bg-[linear-gradient(150deg,#0f172a_0%,#111827_45%,#1d4ed8_100%)] p-6 text-white shadow-[0_28px_70px_rgba(15,23,42,0.28)] sm:p-8">
@@ -18,11 +19,15 @@ export function ResultCard({ copy, recommendation }: ResultCardProps) {
         {copy.shortIntro}
       </p>
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        {/* 매치 점수 배지 — 허용 후보 내 상대 점수 */}
+        <span className="rounded-full bg-cyan-400/20 px-4 py-1.5 text-sm font-semibold text-cyan-200 ring-1 ring-cyan-300/30">
+          이 유형 {matchScore}% 일치
+        </span>
         <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm">
           {main.title}
         </span>
-        {main.matchingGenres.slice(0, 2).map((genre) => (
+        {main.genres.slice(0, 2).map((genre) => (
           <span
             key={genre}
             className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-slate-200"

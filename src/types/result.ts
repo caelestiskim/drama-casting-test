@@ -1,38 +1,34 @@
-import type { Character, CharacterGenre, CharacterRoleType } from "@/data/characters";
+import type { Character, FaceType, FaceVector } from "@/data/characters";
 
-export type MoodKey =
-  | "차분함"
-  | "강렬함"
-  | "부드러움"
-  | "지적임"
-  | "신비로움"
-  | "친근함"
-  | "진지함"
-  | "화면 존재감"
-  | "세련됨"
-  | "청량함";
+export type { FaceType, FaceVector };
 
-export type GenreKey =
-  | "romance"
-  | "crime"
-  | "thriller"
-  | "legal"
-  | "youth"
-  | "fantasy"
-  | "historical"
-  | "noir"
-  | "medical"
-  | "mystery";
+export type GenderPreference = "male" | "female";
 
-export type RoleKey = "lead" | "support" | "rival";
+/** Vision API 또는 fallback이 반환하는 얼굴 분류 결과 */
+export type FaceAnalysisResult = {
+  faceType: FaceType;
+  confidence: number;  // 0-1
+  vector: FaceVector;  // 합계 100
+  summary: string;
+  isFallback?: boolean;
+};
 
-export type AnalyzeFaceResult = {
-  moodTags: MoodKey[];
-  genreScores: Record<GenreKey, number>;
-  roleScores: Record<RoleKey, number>;
-  topCharacters: string[];
-  shortSummary: string;
-  cautionMessage?: string;
+/** 하나의 캐릭터와 매치 점수 */
+export type CharacterMatch = {
+  character: Character;
+  /** 허용된 후보 내 상대 점수, 표시용 70-95 범위 */
+  matchScore: number;
+  reason: string;
+};
+
+/** 최종 캐스팅 판정 결과 */
+export type CastingResult = {
+  faceType: FaceType;
+  vector: FaceVector;
+  main: CharacterMatch;
+  supports: [CharacterMatch, CharacterMatch];
+  summary: string;
+  isFallback?: boolean;
 };
 
 export type FaceValidationResult = {
@@ -43,25 +39,6 @@ export type FaceValidationResult = {
   faceCount: number;
   confidence: number;
   isFrontal: boolean;
-};
-
-export type GenreRank = {
-  key: GenreKey;
-  label: CharacterGenre;
-  score: number;
-};
-
-export type RecommendedCharacter = {
-  character: Character;
-  score: number;
-  reason: string;
-  roleLabel: CharacterRoleType;
-};
-
-export type CharacterRecommendation = {
-  main: RecommendedCharacter;
-  supports: [RecommendedCharacter, RecommendedCharacter];
-  topGenres: [GenreRank, GenreRank, GenreRank];
 };
 
 export type WorkReference = {
@@ -86,14 +63,11 @@ export type ResultCopy = {
   shortIntro: string;
   shareCopy: string;
   sectionEyebrow: string;
-  topGenreTitle: string;
   supportTitle: string;
 };
 
 export type ShareSnapshot = {
   fileName: string;
-  result: AnalyzeFaceResult;
+  result: CastingResult;
   genderPreference?: GenderPreference;
 };
-
-export type GenderPreference = "male" | "female";

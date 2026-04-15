@@ -1,5 +1,16 @@
 import type { CharacterGenre } from "@/data/characters";
-import type { GenreKey } from "@/types/result";
+
+export type GenreKey =
+  | "romance"
+  | "crime"
+  | "thriller"
+  | "legal"
+  | "youth"
+  | "fantasy"
+  | "historical"
+  | "noir"
+  | "medical"
+  | "mystery";
 
 export const genreMeta: Record<
   GenreKey,

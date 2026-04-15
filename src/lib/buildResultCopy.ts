@@ -1,7 +1,6 @@
-import { genreMeta } from "@/data/genres";
 import type { Locale } from "@/lib/i18n";
-import type { Character } from "@/data/characters";
-import type { CharacterRecommendation, ResultCopy } from "@/types/result";
+import type { FaceType } from "@/data/characters";
+import type { CastingResult, ResultCopy } from "@/types/result";
 
 type CharacterCopyPreset = {
   heroSummary: string;
@@ -193,121 +192,50 @@ const copyPresets: Record<string, CharacterCopyPreset> = {
   },
 };
 
-const moodAddons: Record<string, string[]> = {
-  차분함: [
-    "급하게 몰아붙이기보다, 조용히 끝까지 가는 쪽입니다.",
-    "말수보다 안정감이 먼저 남습니다.",
-  ],
-  강렬함: [
-    "짧게 지나가도 인상이 분명하게 남습니다.",
-    "장면의 온도를 단번에 바꾸는 힘이 있습니다.",
-  ],
-  부드러움: [
-    "세게 누르기보다 여백을 남기는 쪽이 더 잘 맞습니다.",
-    "가까이 볼수록 더 좋은 타입입니다.",
-  ],
-  지적임: [
-    "감정에 앞서기보다 상황을 읽는 쪽에 가깝습니다.",
-    "한 번에 소비되기보다 곱씹게 되는 분위기입니다.",
-  ],
-  신비로움: [
-    "다 보여주지 않을 때 더 매력이 살아납니다.",
-    "설명보다 여운이 먼저 남는 쪽입니다.",
-  ],
-  친근함: [
-    "멀게 두기보다 자연스럽게 가까워지는 인상입니다.",
-    "함께 있을수록 더 좋은 장면이 떠오릅니다.",
-  ],
-  진지함: [
-    "웃고 있어도 중심이 쉽게 흐려지지 않습니다.",
-    "가볍게 넘기기보다 무게를 붙잡는 쪽입니다.",
-  ],
-  "화면 존재감": [
-    "한 장면만으로도 존재감이 남는 타입입니다.",
-    "등장하자마자 시선이 자연스럽게 모입니다.",
-  ],
-  세련됨: [
-    "과하게 꾸미지 않아도 분위기가 정리됩니다.",
-    "힘을 많이 주지 않아도 눈에 들어오는 쪽입니다.",
-  ],
-  청량함: [
-    "무겁게 눌리기보다 화면을 환기시키는 힘이 있습니다.",
-    "시작 장면의 공기를 바꾸는 데 강합니다.",
-  ],
+/** 얼굴 타입별 인상 한 문장 — shortIntro에 자연스럽게 붙는 문맥 */
+const faceTypeContext: Record<FaceType, string> = {
+  RUGGED: "강인하고 거친 인상이 화면에서도 그대로 전달되는 타입이에요.",
+  SHARP_COOL: "날카롭고 차가운 첫인상이 자연스럽게 장면을 잡는 타입이에요.",
+  WARM_FRIENDLY: "따뜻하고 친근한 분위기가 먼저 전달되는 타입이에요.",
+  ELEGANT_REFINED: "우아하고 정돈된 인상이 화면에서도 자연스럽게 살아나는 타입이에요.",
+  INTELLECTUAL_SERIOUS: "지적이고 진지한 분위기가 먼저 보이는 타입이에요.",
+  SOFT_YOUTH: "부드럽고 청춘적인 에너지가 먼저 느껴지는 타입이에요.",
+  MYSTERIOUS_DARK: "신비롭고 어두운 분위기가 여운으로 남는 타입이에요.",
+  CHARISMATIC_INTENSE: "강렬하고 카리스마 있는 존재감이 장면을 압도하는 타입이에요.",
 };
 
-const genreAddons: Record<string, string> = {
-  로맨스: "가벼운 설렘보다 감정선이 긴 장면에 더 잘 어울립니다.",
-  범죄: "사건을 끌고 가는 긴장감이 잘 붙습니다.",
-  스릴러: "무슨 일이 생길 것 같은 서늘함이 자연스럽습니다.",
-  법정: "말보다 판단이 남는 장면에서 더 힘이 있습니다.",
-  청춘: "지금 이 순간의 분위기가 살아나는 장면에 잘 어울립니다.",
-  판타지: "현실보다 한 겹 더 낭만적인 장면이 잘 붙습니다.",
-  사극: "무게 있는 한마디가 오래 남는 역할이 어울립니다.",
-  느와르: "밝게 풀기보다 낮은 톤의 긴장이 잘 맞습니다.",
-  메디컬: "침착함과 신뢰가 먼저 필요한 장면에서 강합니다.",
-  미스터리: "다 보여주지 않을수록 더 매력적인 쪽입니다.",
-};
-
-function hashString(input: string) {
-  let hash = 0;
-  for (let index = 0; index < input.length; index += 1) {
-    hash = (hash * 31 + input.charCodeAt(index)) >>> 0;
-  }
-  return hash;
+function getFallbackPreset(characterId: string): CharacterCopyPreset {
+  return (
+    copyPresets[characterId] ?? {
+      heroSummary: "이 역할과 잘 어울리는 분위기가 있어요.",
+      oneLiner: "장면의 분위기를 자연스럽게 이끄는 타입입니다.",
+      intro: "처음 등장부터 인상이 남는 쪽입니다.",
+      share: `오늘의 메인 캐릭터는 ${characterId}. 화면에서도 존재감이 남는 타입.`,
+    }
+  );
 }
 
-function pick<T>(items: T[], seed: string) {
-  return items[hashString(seed) % items.length];
-}
+export function buildResultCopy(result: CastingResult, locale: Locale = "ko"): ResultCopy {
+  const character = result.main.character;
+  const preset = getFallbackPreset(character.id);
+  const context = faceTypeContext[result.faceType];
 
-function getTopGenreLabel(recommendation: CharacterRecommendation) {
-  return recommendation.topGenres[0]?.label ?? genreMeta.romance.label;
-}
-
-function buildShortIntro(
-  preset: CharacterCopyPreset,
-  character: Character,
-  recommendation: CharacterRecommendation,
-  moodTag: string,
-) {
-  const moodLine = pick(moodAddons[moodTag] ?? ["장면이 쉽게 밋밋해지지 않는 타입입니다."], `${character.id}:${moodTag}`);
-  const genreLine =
-    genreAddons[getTopGenreLabel(recommendation)] ??
-    "이야기가 붙을수록 더 또렷해지는 타입입니다.";
-
-  return `${preset.intro} ${moodLine} ${genreLine}`;
-}
-
-export function buildResultCopy(
-  recommendation: CharacterRecommendation,
-  shortSummary: string,
-  moodTags: string[],
-  locale: Locale = "ko",
-): ResultCopy {
-  const character = recommendation.main.character;
-  const preset = copyPresets[character.id];
-  const topMood = moodTags[0] ?? "화면 존재감";
-  const topGenre = getTopGenreLabel(recommendation);
+  const shortIntro = `${preset.intro} ${context}`;
+  const topGenre = character.genres[0] ?? "드라마";
+  const shareCopy = `${preset.share} 특히 ${topGenre} 장르에서 더 잘 어울려요.`;
 
   return {
     title: character.name,
     heroSummary: preset.heroSummary,
     oneLiner: preset.oneLiner,
-    shortIntro: buildShortIntro(preset, character, recommendation, topMood),
-    shareCopy: `${preset.share} 특히 ${topGenre} 장르에서 더 잘 어울려요.`,
+    shortIntro,
+    shareCopy,
     sectionEyebrow:
       locale === "en"
         ? "Your drama casting"
         : locale === "ja"
           ? "あなたのドラマキャスティング"
           : "당신의 드라마 캐스팅",
-    topGenreTitle:
-      locale === "en"
-        ? "Genres that fit you"
-        : locale === "ja"
-          ? "似合うジャンル"
-          : "잘 어울리는 장르",
     supportTitle:
       locale === "en"
         ? "These roles fit too"

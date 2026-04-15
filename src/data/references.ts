@@ -1,4 +1,5 @@
-import type { GenreKey, MoodKey } from "@/types/result";
+import type { FaceType } from "@/data/characters";
+import type { GenreKey } from "@/data/genres";
 
 export const workReferencesByGenre: Record<
   GenreKey,
@@ -59,61 +60,52 @@ export const workReferencesByGenre: Record<
   ],
 };
 
-export const actorReferencesByMood: Record<
-  MoodKey,
+/** 얼굴 타입별 배우 레퍼런스 — 닮은꼴이 아니라 같은 인상 계열 */
+export const actorReferencesByFaceType: Record<
+  FaceType,
   Array<{
     name: string;
     note: string;
   }>
 > = {
-  차분함: [
-    { name: "조승우", note: "조용한데 중심이 단단한 주연 무드" },
-    { name: "김태리", note: "말수보다 분위기가 먼저 남는 무드" },
-    { name: "전도연", note: "차분하게 장면을 잡는 무드" },
+  RUGGED: [
+    { name: "마동석", note: "거칠고 강인한 존재감이 장면을 압도하는 무드" },
+    { name: "정만식", note: "묵직하고 위협적인 분위기가 자연스러운 무드" },
+    { name: "박성웅", note: "강하고 카리스마 있는 악역 무드" },
   ],
-  강렬함: [
-    { name: "이병헌", note: "짧게 나와도 공기가 달라지는 무드" },
-    { name: "전여빈", note: "선명한 에너지로 장면을 끌고 가는 무드" },
-    { name: "이도현", note: "강한 인상과 몰입감을 주는 무드" },
+  SHARP_COOL: [
+    { name: "이병헌", note: "날카롭고 차가운 카리스마가 장면을 지배하는 무드" },
+    { name: "공유", note: "세련되고 서늘한 분위기의 주연 무드" },
+    { name: "현빈", note: "차갑고 단단한 존재감이 먼저 보이는 무드" },
   ],
-  부드러움: [
-    { name: "박보영", note: "편안한데 여운이 남는 무드" },
-    { name: "정해인", note: "부담 없이 스며드는 로맨스 무드" },
-    { name: "신세경", note: "잔잔하고 자연스러운 감정선 무드" },
+  WARM_FRIENDLY: [
+    { name: "조정석", note: "따뜻하고 친근한 에너지가 화면을 살리는 무드" },
+    { name: "류준열", note: "자연스럽고 부담 없이 호감이 가는 무드" },
+    { name: "이선균", note: "편안하고 신뢰감 있는 분위기의 무드" },
   ],
-  지적임: [
-    { name: "이제훈", note: "생각하는 눈빛이 먼저 떠오르는 무드" },
-    { name: "김남길", note: "분석적인 분위기가 강한 무드" },
-    { name: "문소리", note: "말의 무게가 느껴지는 무드" },
-  ],
-  신비로움: [
-    { name: "아이유", note: "설명보다 분위기가 먼저 남는 무드" },
-    { name: "서예지", note: "여백이 매력으로 남는 무드" },
-    { name: "변요한", note: "한 번 더 보게 되는 신비로운 무드" },
-  ],
-  친근함: [
-    { name: "박은빈", note: "가까이 느껴지는 편안한 무드" },
-    { name: "최우식", note: "자연스럽게 호감이 가는 무드" },
-    { name: "이주명", note: "부드럽고 친근한 청춘 무드" },
-  ],
-  진지함: [
-    { name: "손석구", note: "말보다 무게감이 먼저 오는 무드" },
-    { name: "김희애", note: "절제된 감정이 오래 남는 무드" },
-    { name: "유아인", note: "깊은 서사를 떠올리게 하는 무드" },
-  ],
-  "화면 존재감": [
-    { name: "한소희", note: "등장만으로 시선을 잡는 무드" },
-    { name: "박서준", note: "정면에서 힘 있게 중심을 잡는 무드" },
-    { name: "김고은", note: "한 장면만으로도 인상이 남는 무드" },
-  ],
-  세련됨: [
+  ELEGANT_REFINED: [
     { name: "전지현", note: "과하지 않아도 정리된 인상이 남는 무드" },
-    { name: "유연석", note: "도회적인 분위기가 자연스러운 무드" },
-    { name: "배두나", note: "세련되고 단단한 무드" },
+    { name: "손예진", note: "우아하고 정돈된 로맨스 주연 무드" },
+    { name: "김태희", note: "세련되고 고급스러운 분위기의 무드" },
   ],
-  청량함: [
-    { name: "노윤서", note: "맑고 산뜻한 청춘 무드" },
-    { name: "로운", note: "가볍고 시원한 첫사랑 무드" },
-    { name: "고민시", note: "싱그러운 에너지와 여운이 함께 가는 무드" },
+  INTELLECTUAL_SERIOUS: [
+    { name: "조승우", note: "조용한데 중심이 단단한 주연 무드" },
+    { name: "김명민", note: "지적이고 진지한 분위기가 먼저 보이는 무드" },
+    { name: "전도연", note: "차분하게 장면을 잡는 지성적 무드" },
+  ],
+  SOFT_YOUTH: [
+    { name: "박보영", note: "편안한데 여운이 남는 청춘 무드" },
+    { name: "박보검", note: "맑고 부드러운 에너지의 청춘 주연 무드" },
+    { name: "아이유", note: "산뜻하고 자연스러운 감성의 무드" },
+  ],
+  MYSTERIOUS_DARK: [
+    { name: "이준기", note: "신비롭고 어두운 매력이 살아나는 무드" },
+    { name: "고수", note: "속을 알 수 없는 눈빛이 인상적인 무드" },
+    { name: "서예지", note: "설명보다 여백이 더 강한 신비로운 무드" },
+  ],
+  CHARISMATIC_INTENSE: [
+    { name: "황정민", note: "강렬하고 폭발적인 존재감의 카리스마 무드" },
+    { name: "최민식", note: "장면을 장악하는 압도적인 카리스마 무드" },
+    { name: "송강호", note: "짧게 나와도 공기가 달라지는 무드" },
   ],
 };
