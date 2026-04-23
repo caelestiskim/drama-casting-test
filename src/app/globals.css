@@ -1,8 +1,14 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../");
 
 :root {
-  --background: #f4f7fb;
-  --foreground: #0f172a;
+  --background: #faf7f9;
+  --foreground: #2d2f30;
+  --primary: #a8275a;
+  --primary-light: #ff709f;
+  --secondary: #6448b2;
+  --surface: #faf7f9;
+  --surface-low: #f3eef2;
+  --surface-card: #ffffff;
 }
 
 @theme inline {
@@ -26,10 +32,10 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 0% 0%, rgba(244, 114, 182, 0.16), transparent 24%),
-    radial-gradient(circle at 100% 10%, rgba(129, 140, 248, 0.14), transparent 28%),
-    radial-gradient(circle at 50% 100%, rgba(253, 224, 71, 0.12), transparent 30%),
-    linear-gradient(180deg, #fffafc 0%, #f4f7ff 100%);
+    radial-gradient(ellipse at 0% 0%,   rgba(168, 39, 90,  0.07), transparent 32%),
+    radial-gradient(ellipse at 100% 8%,  rgba(100, 72, 178, 0.07), transparent 30%),
+    radial-gradient(ellipse at 50% 100%, rgba(255,112,159,  0.05), transparent 34%),
+    linear-gradient(180deg, #fdf9fb 0%, #f7f3fa 100%);
   color: var(--foreground);
   font-family: var(--font-sans);
 }
@@ -41,3 +47,30 @@ body {
 a {
   text-decoration: none;
 }
+
+/* ── 랜딩 페이지 입장 애니메이션 ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px);   }
+  50%       { transform: translateY(-8px);  }
+}
+@keyframes softPulse {
+  0%, 100% { opacity: 0.55; transform: scale(1);    }
+  50%       { opacity: 0.75; transform: scale(1.06); }
+}
+
+.anim-fade-up          { animation: fadeUp  0.55s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-fade-up-d1       { animation: fadeUp  0.55s cubic-bezier(0.22,1,0.36,1) 0.08s  both; }
+.anim-fade-up-d2       { animation: fadeUp  0.55s cubic-bezier(0.22,1,0.36,1) 0.16s  both; }
+.anim-fade-up-d3       { animation: fadeUp  0.55s cubic-bezier(0.22,1,0.36,1) 0.24s  both; }
+.anim-fade-up-d4       { animation: fadeUp  0.55s cubic-bezier(0.22,1,0.36,1) 0.32s  both; }
+.anim-fade-in          { animation: fadeIn  0.6s  ease both; }
+.anim-float            { animation: floatY  3.8s  ease-in-out infinite; }
+.anim-soft-pulse       { animation: softPulse 4s  ease-in-out infinite; }

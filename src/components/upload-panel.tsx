@@ -8,6 +8,7 @@ import { getCopy } from "@/lib/copy";
 import type { Locale } from "@/lib/i18n";
 import { validateFaceImage } from "@/lib/face/validateFace";
 import {
+  CASTING_RESULT_CACHE_KEY,
   UPLOADED_FACE_GENDER_KEY,
   UPLOADED_FACE_IMAGE_KEY,
   UPLOADED_FACE_NAME_KEY,
@@ -52,12 +53,13 @@ export function UploadPanel({ locale }: { locale: Locale }) {
   const [validation, setValidation] = useState<FaceValidationResult | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [genderPreference, setGenderPreference] = useState<GenderPreference>("male");
+  const [genderPreference, setGenderPreference] = useState<GenderPreference>("female");
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isCameraStarting, setIsCameraStarting] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const trustChips = [
     locale === "ko" ? "무료" : locale === "ja" ? "無料" : "Free",
     "JPG · PNG · HEIC",
@@ -70,30 +72,24 @@ export function UploadPanel({ locale }: { locale: Locale }) {
   ];
   const toneOptions = [
     {
-      value: "male" as GenderPreference,
-      label: t.toneMale,
-      sparkleA: "✦",
-      sparkleB: "◆",
-      badge:
-        "bg-[linear-gradient(135deg,#0ea5e9_0%,#38bdf8_100%)] shadow-[0_10px_18px_rgba(14,165,233,0.28)]",
-      shell:
-        "bg-[linear-gradient(135deg,rgba(245,251,255,0.98)_0%,rgba(236,248,255,0.98)_100%)] border-sky-100 shadow-[0_16px_30px_rgba(14,165,233,0.14)]",
-      icon:
-        "bg-[linear-gradient(135deg,rgba(14,165,233,0.14)_0%,rgba(56,189,248,0.3)_100%)] text-sky-700",
-      sparkleColor: "text-sky-500",
-    },
-    {
       value: "female" as GenderPreference,
       label: t.toneFemale,
       sparkleA: "♥",
       sparkleB: "✿",
-      badge:
-        "bg-[linear-gradient(135deg,#ec4899_0%,#a855f7_100%)] shadow-[0_10px_18px_rgba(168,85,247,0.24)]",
-      shell:
-        "bg-[linear-gradient(135deg,rgba(255,245,252,0.98)_0%,rgba(254,238,248,0.98)_100%)] border-pink-100 shadow-[0_16px_30px_rgba(236,72,153,0.16)]",
-      icon:
-        "bg-[linear-gradient(135deg,rgba(244,114,182,0.14)_0%,rgba(217,70,239,0.28)_100%)] text-pink-700",
-      sparkleColor: "text-pink-500",
+      badgeStyle: "background: linear-gradient(135deg,#a8275a 0%,#ff709f 100%); box-shadow:0 8px 16px rgba(168,39,90,0.28)",
+      shellStyle: "background:#ffffff; box-shadow:0 8px 24px rgba(168,39,90,0.14)",
+      shellStyleInactive: "background:#ffffff; opacity:0.7",
+      sparkleColor: "#a8275a",
+    },
+    {
+      value: "male" as GenderPreference,
+      label: t.toneMale,
+      sparkleA: "✦",
+      sparkleB: "◆",
+      badgeStyle: "background: linear-gradient(135deg,#6448b2 0%,#9c7fe8 100%); box-shadow:0 8px 16px rgba(100,72,178,0.28)",
+      shellStyle: "background:#ffffff; box-shadow:0 8px 24px rgba(100,72,178,0.14)",
+      shellStyleInactive: "background:#ffffff; opacity:0.7",
+      sparkleColor: "#6448b2",
     },
   ];
 
@@ -124,6 +120,8 @@ export function UploadPanel({ locale }: { locale: Locale }) {
     window.sessionStorage.removeItem(UPLOADED_FACE_IMAGE_KEY);
     window.sessionStorage.removeItem(UPLOADED_FACE_NAME_KEY);
     window.sessionStorage.removeItem(UPLOADED_FACE_GENDER_KEY);
+    // 새 사진 업로드 시 이전 분석 캐시 제거
+    window.sessionStorage.removeItem(CASTING_RESULT_CACHE_KEY);
   };
 
   const processImage = async (dataUrl: string, sourceFileName: string) => {
@@ -139,6 +137,8 @@ export function UploadPanel({ locale }: { locale: Locale }) {
       setValidation(faceResult);
 
       if (faceResult.canProceed) {
+        // 새 이미지 저장 시 이전 분석 캐시 반드시 삭제
+        window.sessionStorage.removeItem(CASTING_RESULT_CACHE_KEY);
         window.sessionStorage.setItem(UPLOADED_FACE_IMAGE_KEY, dataUrl);
         window.sessionStorage.setItem(UPLOADED_FACE_NAME_KEY, sourceFileName);
         if (genderPreference) {
@@ -162,6 +162,49 @@ export function UploadPanel({ locale }: { locale: Locale }) {
     } finally {
       setIsChecking(false);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setValidation({
+        canProceed: false,
+        status: "error",
+        message:
+          locale === "ko"
+            ? "10MB 이하 사진으로 다시 올려 주세요."
+            : locale === "ja"
+              ? "10MB以下の写真で再度アップロードしてください。"
+              : "Please upload a photo under 10MB.",
+        warnings: [],
+        faceCount: 0,
+        confidence: 0,
+        isFrontal: false,
+      });
+      return;
+    }
+
+    const dataUrl = await readFileAsDataUrl(file);
+    await processImage(dataUrl, file.name);
   };
 
   const handleSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -267,36 +310,57 @@ export function UploadPanel({ locale }: { locale: Locale }) {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-[2.5rem] border border-pink-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(254,250,255,0.96)_100%)] p-6 shadow-[0_30px_90px_rgba(236,72,153,0.08)] sm:p-8">
-      <div className="pointer-events-none absolute -right-12 top-8 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(167,139,250,0.18)_0%,rgba(167,139,250,0)_72%)]" />
-      <div className="pointer-events-none absolute -left-10 bottom-12 h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(244,114,182,0.16)_0%,rgba(244,114,182,0)_72%)]" />
-      <p className="text-sm font-semibold tracking-[0.18em] text-pink-600">{t.eyebrow}</p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-[2.2rem]">
-        {t.title}
-      </h2>
-      <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-        {t.description}
-      </p>
-      <div className="mt-6 flex flex-wrap gap-2.5">
-        {trustChips.map((chip) => (
-          <span
-            key={chip}
-            className="inline-flex items-center gap-2 rounded-full border border-pink-100 bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-slate-600 shadow-[0_8px_20px_rgba(244,114,182,0.07)]"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-pink-400" />
-            {chip}
-          </span>
-        ))}
+    <section
+      className="relative overflow-hidden rounded-[2.2rem] p-6 sm:p-8"
+      style={{ background: "#ffffff", boxShadow: "0 12px 48px rgba(45,47,48,0.07)" }}
+    >
+      {/* 배경 블러 오브 */}
+      <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full opacity-50 blur-3xl"
+        style={{ background: "radial-gradient(circle, #ffc8dc, transparent 70%)" }} />
+      <div className="pointer-events-none absolute -bottom-8 -left-8 h-36 w-36 rounded-full opacity-40 blur-3xl"
+        style={{ background: "radial-gradient(circle, #d8caff, transparent 70%)" }} />
+
+      <div className="relative">
+        {/* 스텝 배지 */}
+        <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em]"
+          style={{ background: "#fde8f0", color: "#a8275a" }}>
+          <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: "#a8275a" }} />
+          {t.eyebrow}
+        </div>
+
+        <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-[2.1rem]"
+          style={{ color: "#2d2f30", letterSpacing: "-0.02em" }}>
+          {t.title}
+        </h2>
+        <p className="mt-3 max-w-lg text-[15px] leading-[1.7]" style={{ color: "#7a7d80" }}>
+          {t.description}
+        </p>
+
+        {/* 트러스트 칩 */}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {trustChips.map((chip) => (
+            <span
+              key={chip}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold"
+              style={{ background: "#f3eef2", color: "#6448b2" }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "#a8275a" }} />
+              {chip}
+            </span>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-8 rounded-[2rem] border border-violet-100 bg-[linear-gradient(180deg,#faf7ff_0%,#ffffff_100%)] p-5 shadow-[0_18px_40px_rgba(168,85,247,0.08)]">
-        <p className="text-sm font-semibold tracking-[0.18em] text-violet-500">
+      {/* 성별 선택 — 배경 전환으로 구분 (no border) */}
+      <div className="mt-6 rounded-[1.9rem] p-5"
+        style={{ background: "#f3eef2" }}>
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: "#a8275a" }}>
           {t.characterTone}
         </p>
-        <p className="mt-2 text-sm leading-6 text-slate-500">{t.toneHint}</p>
-        <fieldset className="mt-5">
+        <p className="mt-1.5 text-xs leading-5" style={{ color: "#9c8fa0" }}>{t.toneHint}</p>
+        <fieldset className="mt-4">
           <legend className="sr-only">{t.characterTone}</legend>
-          <div className="grid grid-cols-2 gap-3 rounded-[2rem] border border-violet-100 bg-white p-3">
+          <div className="grid grid-cols-2 gap-3">
             {toneOptions.map((option) => {
               const isSelected = genderPreference === option.value;
               const inputId = `tone-${option.value}`;
@@ -314,51 +378,29 @@ export function UploadPanel({ locale }: { locale: Locale }) {
                   />
                   <label
                     htmlFor={inputId}
-                    className={`flex min-h-[92px] cursor-pointer items-center justify-between rounded-[1.5rem] border px-5 py-4 text-left transition ${
-                      isSelected
-                        ? option.shell
-                        : "border-transparent bg-transparent text-slate-500 hover:border-slate-200 hover:bg-slate-50"
-                    }`}
+                    className="flex min-h-[88px] cursor-pointer flex-col items-center justify-center gap-2.5 rounded-[1.4rem] px-4 py-4 text-center transition-all duration-200 hover:scale-[1.02]"
+                    style={isSelected ? { ...Object.fromEntries(option.shellStyle.split(";").filter(Boolean).map(s => { const [k, ...v] = s.trim().split(":"); return [k.trim().replace(/-([a-z])/g, (_,c)=>c.toUpperCase()), v.join(":").trim()]; })) } : { background: "#ffffff", opacity: 0.75 }}
                   >
-                    <div className="flex items-center gap-4">
-                      <span
-                        className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-bold text-white transition ${option.badge} ${
-                          isSelected ? "scale-100 opacity-100" : "scale-95 opacity-60"
-                        }`}
-                      >
-                        {option.value === "male" ? "M" : "F"}
+                    <span
+                      className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-bold text-white transition-all duration-200"
+                      style={isSelected
+                        ? Object.fromEntries(option.badgeStyle.split(";").filter(Boolean).map(s => { const [k, ...v] = s.trim().split(":"); return [k.trim().replace(/-([a-z])/g, (_,c)=>c.toUpperCase()), v.join(":").trim()]; }))
+                        : { background: "#e8e2f0", color: "#9c8fa0" }
+                      }
+                    >
+                      {option.value === "male" ? "M" : "F"}
+                    </span>
+                    <span
+                      className="text-sm font-semibold transition-all duration-200"
+                      style={{ color: isSelected ? "#2d2f30" : "#9c8fa0" }}
+                    >
+                      {option.label}
+                    </span>
+                    {isSelected && (
+                      <span className="text-xs" style={{ color: option.sparkleColor }}>
+                        {option.sparkleA} {option.sparkleB}
                       </span>
-                      <span
-                        className={`text-[1.1rem] font-semibold transition ${
-                          isSelected ? "text-slate-950" : "text-slate-400"
-                        }`}
-                      >
-                        {option.label}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="relative h-10 w-10">
-                        <span
-                          className={`absolute left-0 top-0 text-base transition ${
-                            isSelected ? `${option.sparkleColor} opacity-100` : "text-slate-300 opacity-40"
-                          }`}
-                        >
-                          {option.sparkleA}
-                        </span>
-                        <span
-                          className={`absolute bottom-0 right-0 text-sm transition ${
-                            isSelected ? `${option.sparkleColor} opacity-100` : "text-slate-300 opacity-40"
-                          }`}
-                        >
-                          {option.sparkleB}
-                        </span>
-                      </div>
-                      <span
-                        className={`inline-flex h-3.5 w-3.5 rounded-full transition ${
-                          isSelected ? option.icon : "bg-slate-200"
-                        }`}
-                      />
-                    </div>
+                    )}
                   </label>
                 </div>
               );
@@ -367,8 +409,8 @@ export function UploadPanel({ locale }: { locale: Locale }) {
         </fieldset>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_0.92fr]">
-        <div className="rounded-[1.9rem] border border-dashed border-pink-200 bg-[linear-gradient(180deg,#fff7fb_0%,#fdfdff_100%)] p-5">
+      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_0.92fr]">
+        <div className="rounded-[1.9rem] p-1" style={{ background: "#fdf8fa" }}>
           <input
             id="file-upload-input"
             ref={fileInputRef}
@@ -387,27 +429,71 @@ export function UploadPanel({ locale }: { locale: Locale }) {
             onChange={handleSelect}
           />
 
-          <div className="relative rounded-[1.75rem] border border-pink-100 bg-white px-5 py-8 text-center shadow-[0_18px_40px_rgba(244,114,182,0.08)]">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[1.6rem] bg-[linear-gradient(135deg,#ffe4f2_0%,#f2e8ff_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-              <div className="relative h-8 w-8 rounded-2xl border-2 border-violet-300/90">
-                <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-400" />
-              </div>
+          {/* 업로드 존 */}
+          <div
+            className="rounded-[1.75rem] px-5 py-8 text-center transition-all duration-200"
+            style={{
+              background: isDragging ? "#f3eef2" : "#ffffff",
+              border: `2px dashed ${isDragging ? "#a8275a" : "#e8dde6"}`,
+              boxShadow: isDragging
+                ? "0 12px 32px rgba(168,39,90,0.12)"
+                : "0 6px 24px rgba(45,47,48,0.05)",
+              transform: isDragging ? "scale(1.01)" : "scale(1)",
+            }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => void handleDrop(e)}
+          >
+            {/* 카메라 아이콘 */}
+            <div
+              className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full transition-all duration-200"
+              style={{
+                background: isDragging
+                  ? "linear-gradient(135deg,#6448b2 0%,#9c7fe8 100%)"
+                  : "linear-gradient(135deg,#a8275a 0%,#ff709f 100%)",
+                boxShadow: "0 8px 24px rgba(168,39,90,0.25)",
+              }}
+            >
+              {isDragging ? (
+                <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              ) : (
+                <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              )}
             </div>
-            <p className="text-lg font-semibold text-slate-950">{t.uploadTitle}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              {t.uploadHint}
+
+            <p className="text-lg font-bold" style={{ color: "#2d2f30" }}>
+              {isDragging
+                ? (locale === "ko" ? "여기에 놓으세요" : locale === "ja" ? "ここに置いてください" : "Drop it here")
+                : t.uploadTitle}
             </p>
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <p className="mt-2 text-sm leading-6" style={{ color: "#9c8fa0" }}>
+              {isDragging
+                ? (locale === "ko" ? "놓으면 바로 분석을 시작합니다" : locale === "ja" ? "離すとすぐに分析します" : "Release to start analysis")
+                : t.uploadHint}
+            </p>
+
+            {/* 버튼들 */}
+            <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
               <label
                 htmlFor="file-upload-input"
-                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="inline-flex cursor-pointer items-center justify-center rounded-full px-6 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.04] hover:brightness-110 active:scale-[0.97]"
+                style={{
+                  background: "linear-gradient(135deg,#a8275a 0%,#ff709f 100%)",
+                  boxShadow: "0 4px 16px rgba(168,39,90,0.30)",
+                }}
               >
                 {t.chooseLibrary}
               </label>
               {isMobileDevice ? (
                 <label
                   htmlFor="camera-upload-input"
-                  className="inline-flex items-center justify-center rounded-full border border-pink-200 bg-pink-50 px-5 py-3 text-sm font-semibold text-pink-700 transition hover:border-pink-300 hover:bg-pink-100"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-full border px-6 py-2.5 text-sm font-semibold transition-all duration-200 hover:scale-[1.04] active:scale-[0.97]"
+                  style={{ borderColor: "#e8dde6", color: "#a8275a", background: "#fde8f0" }}
                 >
                   {t.mobileCamera}
                 </label>
@@ -415,51 +501,51 @@ export function UploadPanel({ locale }: { locale: Locale }) {
               <button
                 type="button"
                 onClick={() => void handleOpenCamera()}
-                className="inline-flex items-center justify-center rounded-full border border-violet-200 bg-violet-50 px-5 py-3 text-sm font-semibold text-violet-700 transition hover:border-violet-300 hover:bg-violet-100"
+                className="inline-flex items-center justify-center rounded-full border px-6 py-2.5 text-sm font-semibold transition-all duration-200 hover:scale-[1.04] active:scale-[0.97]"
+                style={{ borderColor: "#ddd5f5", color: "#6448b2", background: "#f3eef2" }}
               >
                 {isCameraStarting ? t.desktopCameraLoading : t.desktopCamera}
               </button>
             </div>
-            <p className="mt-4 text-xs leading-5 text-slate-500">
+
+            <p className="mt-4 text-[11px] leading-5" style={{ color: "#b8afc0" }}>
               {isMobileDevice ? t.mobileHint : t.desktopHint}
             </p>
-            <p className="mt-2 text-xs leading-5 text-slate-400">
-              JPG, PNG, HEIC · 10MB
+            <p className="mt-1.5 text-[11px]" style={{ color: "#c5bcc9" }}>
+              JPG · PNG · HEIC · 10MB
+            </p>
+            <p className="mt-2 text-[10.5px] leading-5" style={{ color: "#c5bcc9" }}>
+              {locale === "en"
+                ? "Sent to OpenAI for analysis · Not stored after use"
+                : locale === "ja"
+                  ? "OpenAIに送信・使用後は保存しません"
+                  : "분석을 위해 OpenAI로 전달 · 사용 후 저장 안 함"}
             </p>
           </div>
 
           {isCameraOpen ? (
-            <div className="mt-5 rounded-[1.6rem] border border-violet-100 bg-white p-4">
+            <div className="mt-4 rounded-[1.6rem] p-4"
+              style={{ background: "#ffffff", boxShadow: "0 6px 24px rgba(45,47,48,0.07)" }}>
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-slate-950">{t.webcamTitle}</p>
-                <button
-                  type="button"
-                  onClick={closeCamera}
-                  className="text-sm font-medium text-slate-500 transition hover:text-slate-800"
-                >
+                <p className="text-sm font-bold" style={{ color: "#2d2f30" }}>{t.webcamTitle}</p>
+                <button type="button" onClick={closeCamera}
+                  className="text-xs font-semibold transition hover:opacity-70"
+                  style={{ color: "#9c8fa0" }}>
                   {t.close}
                 </button>
               </div>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="mt-4 h-64 w-full rounded-[1.35rem] bg-slate-950 object-cover"
-              />
-              <div className="mt-4 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => void handleCapture()}
-                  className="inline-flex flex-1 items-center justify-center rounded-full bg-[linear-gradient(135deg,#ec4899_0%,#8b5cf6_100%)] px-5 py-3 text-sm font-semibold text-white"
-                >
+              <video ref={videoRef} autoPlay playsInline muted
+                className="mt-3 h-64 w-full rounded-[1.2rem] object-cover"
+                style={{ background: "#2d2f30" }} />
+              <div className="mt-3 flex gap-2.5">
+                <button type="button" onClick={() => void handleCapture()}
+                  className="inline-flex flex-1 items-center justify-center rounded-full py-3 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ background: "linear-gradient(135deg,#a8275a 0%,#ff709f 100%)", boxShadow: "0 4px 16px rgba(168,39,90,0.28)" }}>
                   {t.useShot}
                 </button>
-                <button
-                  type="button"
-                  onClick={closeCamera}
-                  className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700"
-                >
+                <button type="button" onClick={closeCamera}
+                  className="inline-flex items-center justify-center rounded-full border px-5 py-3 text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ borderColor: "#e8dde6", color: "#9c8fa0" }}>
                   {t.cancel}
                 </button>
               </div>
@@ -467,14 +553,18 @@ export function UploadPanel({ locale }: { locale: Locale }) {
           ) : null}
 
           {cameraError ? (
-            <div className="mt-5 rounded-[1.3rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
+            <div className="mt-4 rounded-[1.3rem] px-4 py-3 text-sm leading-6"
+              style={{ background: "#fff8ec", color: "#92600a" }}>
               {cameraError}
             </div>
           ) : null}
 
-          <div className="mt-5 rounded-[1.6rem] border border-pink-100 bg-white p-4">
-            <p className="text-sm text-slate-500">{t.selectedFile}</p>
-            <p className="mt-2 text-base font-semibold text-slate-950">{fileName}</p>
+          {/* 선택된 파일 미리보기 */}
+          <div className="mt-4 rounded-[1.6rem] p-4"
+            style={{ background: "#f3eef2" }}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.15em]"
+              style={{ color: "#9c8fa0" }}>{t.selectedFile}</p>
+            <p className="mt-1.5 text-sm font-semibold" style={{ color: "#2d2f30" }}>{fileName}</p>
             {previewUrl ? (
               <Image
                 src={previewUrl}
@@ -482,91 +572,84 @@ export function UploadPanel({ locale }: { locale: Locale }) {
                 width={720}
                 height={420}
                 unoptimized
-                className="mt-4 h-64 w-full rounded-[1.35rem] object-cover"
+                className="mt-3 h-56 w-full rounded-[1.2rem] object-cover"
+                style={{ boxShadow: "0 6px 20px rgba(45,47,48,0.10)" }}
               />
             ) : null}
           </div>
 
+          {/* 메인 CTA — Stitch_ "ANALYZE MY LOOK" 스타일 */}
           <button
             type="button"
             onClick={handleSubmit}
             disabled={!validation?.canProceed || isSubmitting}
-            className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-[linear-gradient(135deg,#ec4899_0%,#8b5cf6_100%)] px-6 py-4 text-sm font-semibold text-white shadow-[0_18px_30px_rgba(168,85,247,0.28)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none"
+            className="mt-4 inline-flex w-full items-center justify-center rounded-full py-4 text-sm font-bold uppercase tracking-[0.1em] text-white transition-all duration-200 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            style={{
+              background: "linear-gradient(135deg,#a8275a 0%,#ff709f 100%)",
+              boxShadow: "0 8px 28px rgba(168,39,90,0.30)",
+            }}
           >
             {isSubmitting ? t.submitting : t.submit}
           </button>
         </div>
 
+        {/* 오른쪽: 상태 체크 + 노트 */}
         <div className="space-y-4">
-          <div className="rounded-[1.8rem] border border-sky-100 bg-[linear-gradient(180deg,#f5fbff_0%,#ffffff_100%)] p-5 shadow-[0_16px_36px_rgba(56,189,248,0.08)]">
+          <div className="rounded-[1.8rem] p-5"
+            style={{ background: "#ffffff", boxShadow: "0 8px_32px rgba(45,47,48,0.06)" }}>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold tracking-[0.18em] text-sky-600">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em]"
+                style={{ color: "#a8275a" }}>
                 {t.quickCheck}
               </p>
-              <span className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white px-3 py-1 text-xs font-semibold text-slate-500">
-                <span className={`h-2 w-2 rounded-full ${isChecking ? "bg-amber-400" : validation?.canProceed ? "bg-emerald-400" : validation ? "bg-rose-400" : "bg-sky-400"}`} />
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold"
+                style={{ background: "#f3eef2", color: "#6448b2" }}>
+                <span className={`h-1.5 w-1.5 rounded-full ${isChecking ? "bg-amber-400" : validation?.canProceed ? "bg-emerald-400" : validation ? "bg-rose-400" : ""}`}
+                  style={!isChecking && !validation ? { background: "#a8275a" } : {}} />
                 {isChecking
-                  ? locale === "ko"
-                    ? "확인 중"
-                    : locale === "ja"
-                      ? "確認中"
-                      : "Checking"
+                  ? (locale === "ko" ? "확인 중" : locale === "ja" ? "確認中" : "Checking")
                   : validation?.canProceed
-                    ? locale === "ko"
-                      ? "진행 가능"
-                      : locale === "ja"
-                        ? "進行可能"
-                        : "Ready"
+                    ? (locale === "ko" ? "진행 가능" : locale === "ja" ? "進行可能" : "Ready")
                     : validation
-                      ? locale === "ko"
-                        ? "다시 확인"
-                        : locale === "ja"
-                          ? "再確認"
-                          : "Review"
-                      : locale === "ko"
-                        ? "대기 중"
-                        : locale === "ja"
-                          ? "待機中"
-                          : "Standby"}
+                      ? (locale === "ko" ? "다시 확인" : locale === "ja" ? "再確認" : "Review")
+                      : (locale === "ko" ? "대기 중" : locale === "ja" ? "待機中" : "Standby")}
               </span>
             </div>
             {isChecking ? (
-              <p className="mt-3 text-base leading-7 text-slate-700">
-                {t.checking}
-              </p>
+              <p className="mt-3 text-sm leading-7" style={{ color: "#2d2f30" }}>{t.checking}</p>
             ) : validation ? (
               <div className="mt-3">
-                <p
-                  className={
-                    validation.status === "error"
-                      ? "text-base leading-7 text-rose-600"
-                      : validation.status === "warning"
-                        ? "text-base leading-7 text-amber-700"
-                        : "text-base leading-7 text-slate-700"
-                  }
-                >
+                <p className="text-sm leading-7"
+                  style={{ color: validation.status === "error" ? "#c0392b" : validation.status === "warning" ? "#92600a" : "#2d2f30" }}>
                   {validation.message}
                 </p>
                 {validation.warnings.length > 0 ? (
-                  <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+                  <ul className="mt-2 space-y-1.5 text-xs leading-5" style={{ color: "#7a7d80" }}>
                     {validation.warnings.map((warning) => (
-                      <li key={warning}>• {warning}</li>
+                      <li key={warning} className="flex items-start gap-1.5">
+                        <span className="mt-1 shrink-0 text-[8px]" style={{ color: "#c5bcc9" }}>●</span>
+                        {warning}
+                      </li>
                     ))}
                   </ul>
                 ) : null}
               </div>
             ) : (
-              <p className="mt-3 text-base leading-7 text-slate-600">
-                {t.quickCheckHint}
-              </p>
+              <p className="mt-3 text-sm leading-7" style={{ color: "#7a7d80" }}>{t.quickCheckHint}</p>
             )}
           </div>
 
-          <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm font-semibold tracking-[0.18em] text-slate-500">{t.notesTitle}</p>
-            <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+          <div className="rounded-[1.6rem] p-5"
+            style={{ background: "#f3eef2" }}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em]"
+              style={{ color: "#9c8fa0" }}>{t.notesTitle}</p>
+            <ul className="mt-3 space-y-2">
               {t.notes.map((note) => (
-                <li key={note}>• {note}</li>
+                <li key={note} className="flex items-start gap-2 text-xs leading-5"
+                  style={{ color: "#6b6e70" }}>
+                  <span className="mt-1 shrink-0 text-[8px]" style={{ color: "#c5bcc9" }}>●</span>
+                  {note}
+                </li>
               ))}
             </ul>
           </div>

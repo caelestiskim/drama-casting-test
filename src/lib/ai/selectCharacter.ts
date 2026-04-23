@@ -20,28 +20,20 @@ function cosineSimilarity(a: FaceVector, b: FaceVector): number {
   return dot / (magA * magB);
 }
 
-/**
- * 허용된 후보 내 상대 점수를 70~95 범위로 변환
- * - 1위: 82~95
- * - 2위: 75~85
- * - 3위: 70~80
- */
 function toDisplayScore(
   similarity: number,
-  allSimilarities: number[],
   rank: number,
 ): number {
-  const min = Math.min(...allSimilarities);
-  const max = Math.max(...allSimilarities);
-  const range = max - min;
+  // 코사인 유사도(0.65~1.0)를 표시 점수(60~95)로 변환
+  // 절대값 기반이라 실제 유사도가 낮으면 낮은 점수가 나옴
+  const clamped = Math.min(1, Math.max(0.65, similarity));
+  const normalized = (clamped - 0.65) / 0.35; // 0.65→0, 1.0→1
 
-  // 후보가 1개이거나 모두 같은 점수인 경우
-  if (range < 0.001) return rank === 0 ? 88 : rank === 1 ? 80 : 74;
+  const [low, high] =
+    rank === 0 ? [65, 95] :
+    rank === 1 ? [55, 84] :
+                 [46, 76];
 
-  const normalized = (similarity - min) / range; // 0~1
-
-  // rank별 표시 범위 설정
-  const [low, high] = rank === 0 ? [82, 95] : rank === 1 ? [75, 85] : [70, 80];
   return Math.round(low + normalized * (high - low));
 }
 
@@ -91,28 +83,34 @@ export function selectCharacter(
   }
 
   // 4. 코사인 유사도 계산
+  const jitter = () => 1 + (Math.random() - 0.5) * 0.06; // ±3%
   const scored: ScoredCharacter[] = candidates
     .map((character) => ({
       character,
-      similarity: cosineSimilarity(vector, character.vector),
+      similarity: cosineSimilarity(vector, character.vector) * jitter(),
     }))
     .sort((a, b) => b.similarity - a.similarity);
 
-  const allSims = scored.map((s) => s.similarity);
-
   const toMatch = (item: ScoredCharacter, rank: number): CharacterMatch => ({
     character: item.character,
-    matchScore: toDisplayScore(item.similarity, allSims, rank),
+    matchScore: toDisplayScore(item.similarity, rank),
     reason: buildReason(faceType, item.character.name),
   });
 
-  const [first, second, third] = scored;
+  const [first, ...rest] = scored;
+
+  // ── 서브 캐릭터: 상위 5개를 유사도 순으로 반환 ──────────────
+  // 무료: UI에서 앞 2개만 표시
+  // 프리미엄: 최대 5개 전부 표시
+  const supports = rest
+    .slice(0, Math.min(5, rest.length))
+    .map((item, i) => toMatch(item, i + 1));
 
   return {
     faceType,
     vector,
     main: toMatch(first, 0),
-    supports: [toMatch(second, 1), toMatch(third, 2)],
+    supports,
     summary: "",  // 호출 측에서 FaceAnalysisResult.summary로 채움
   };
 }

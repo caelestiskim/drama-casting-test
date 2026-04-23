@@ -7,10 +7,14 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   const copy = getCopy(locale);
   const footer = copy.footer;
   const year = new Date().getFullYear();
+  const blogLabel =
+    locale === "en" ? "Blog" : locale === "ja" ? "ブログ" : "블로그";
+
   const navItems = [
+    { href: `/${locale}/blog`, label: blogLabel },
+    { href: `/${locale}/about`, label: copy.nav.about },
     { href: `/${locale}/privacy`, label: footer.privacyTitle },
     { href: `/${locale}/terms`, label: footer.termsTitle },
-    { href: `/${locale}/about`, label: copy.nav.about },
   ];
 
   return (
