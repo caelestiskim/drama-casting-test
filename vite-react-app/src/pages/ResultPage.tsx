@@ -13,24 +13,24 @@ export function ResultPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-6 py-8 sm:px-10">
-      <header className="flex items-center justify-between py-4">
-        <div>
+      <header className="flex flex-wrap items-center justify-between gap-4 py-4">
+        <div className="min-w-0">
           <p className="text-sm font-semibold tracking-[0.2em] text-cyan-700">{copy.result.eyebrow}</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
             {copy.result.title}
           </h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <LocaleSwitcher locale={locale} path="/result" />
           <Link
             to={buildLocalePath(locale, "/upload")}
-            className="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:text-slate-950"
+            className="whitespace-nowrap rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-950 hover:text-slate-950"
           >
             {copy.nav.retry}
           </Link>
           <Link
             to={buildLocalePath(locale)}
-            className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="whitespace-nowrap rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
             {copy.nav.home}
           </Link>

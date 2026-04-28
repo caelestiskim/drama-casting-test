@@ -27,7 +27,7 @@ export function UploadPage() {
           <LocaleSwitcher locale={locale} path="/upload" />
           <Link
             to={buildLocalePath(locale)}
-            className="rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-200 hover:scale-[1.04] active:scale-[0.97]"
+            className="whitespace-nowrap rounded-full border px-4 py-2 text-xs font-semibold transition-all duration-200 hover:scale-[1.04] active:scale-[0.97]"
             style={{ borderColor: "#e8dde6", color: "#9c8fa0", background: "#ffffff" }}
           >
             {copy.nav.backHome}

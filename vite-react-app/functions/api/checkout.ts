@@ -30,7 +30,7 @@ export async function onRequestPost(context: {
 
   try {
     const body = (await request.json()) as { embedOrigin?: string; locale?: string };
-    embedOrigin = body.embedOrigin ?? "http://localhost:3000";
+    embedOrigin = body.embedOrigin ?? new URL(request.url).origin;
     locale = body.locale ?? "ko";
   } catch {
     return json({ error: "Invalid request body" }, 400);

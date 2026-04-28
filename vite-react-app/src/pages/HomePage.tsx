@@ -17,16 +17,16 @@ export function HomePage() {
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-8 sm:px-10">
 
       {/* ── 헤더 ── */}
-      <header className="anim-fade-in flex items-center justify-between py-4">
-        <div>
+      <header className="anim-fade-in flex flex-wrap items-center justify-between gap-4 py-4">
+        <div className="min-w-0">
           <p className="text-xs font-semibold tracking-[0.22em] text-pink-400">
             {copy.home.eyebrow}
           </p>
-          <h1 className="mt-2 text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl">
+          <h1 className="mt-2 hidden text-xl font-semibold tracking-tight text-slate-800 sm:block sm:text-2xl">
             {copy.home.title}
           </h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <LocaleSwitcher locale={locale} path="" />
           <Link
             to={buildLocalePath(locale, "/blog")}
@@ -36,7 +36,7 @@ export function HomePage() {
           </Link>
           <Link
             to={buildLocalePath(locale, "/upload")}
-            className="rounded-full bg-gradient-to-r from-pink-500 to-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(168,85,247,0.30)] transition-all duration-200 hover:scale-[1.05] hover:shadow-[0_6px_20px_rgba(168,85,247,0.42)] active:scale-[0.97]"
+            className="whitespace-nowrap rounded-full bg-gradient-to-r from-pink-500 to-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(168,85,247,0.30)] transition-all duration-200 hover:scale-[1.05] hover:shadow-[0_6px_20px_rgba(168,85,247,0.42)] active:scale-[0.97]"
           >
             {copy.nav.start}
           </Link>
@@ -58,7 +58,7 @@ export function HomePage() {
               {copy.home.heroEyebrow}
             </p>
 
-            <h2 className="mt-5 max-w-xl text-5xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-6xl">
+            <h2 className="mt-5 max-w-xl break-keep text-5xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-6xl">
               {copy.home.heroTitleA}
               <span className="block bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
                 {copy.home.heroTitleB}
@@ -72,7 +72,7 @@ export function HomePage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to={buildLocalePath(locale, "/upload")}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_6px_18px_rgba(168,85,247,0.32)] transition-all duration-200 hover:scale-[1.05] hover:shadow-[0_8px_24px_rgba(168,85,247,0.44)] active:scale-[0.97]"
+                className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-pink-500 to-violet-500 px-7 py-3.5 text-sm font-semibold text-white shadow-[0_6px_18px_rgba(168,85,247,0.32)] transition-all duration-200 hover:scale-[1.05] hover:shadow-[0_8px_24px_rgba(168,85,247,0.44)] active:scale-[0.97]"
               >
                 {copy.home.startTest}
                 <span className="anim-float inline-block">✨</span>

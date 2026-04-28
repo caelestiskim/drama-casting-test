@@ -34,7 +34,7 @@ mock-ai-webapp/
 │   ├── wrangler.toml        ← Cloudflare Pages 설정
 │   └── package.json         ← build: "vite build && cp dist/index.html dist/404.html"
 │
-├── src/                     ← ⚠️ Next.js 앱 (사용 안 함, 삭제해도 됨)
+├── src/                     ← ⚠️ 이전 Next.js 앱 (운영 배포 대상 아님)
 └── HANDOFF.md               ← 이 파일
 ```
 
@@ -94,9 +94,22 @@ mock-ai-webapp/
   - 재배포 후 사용자가 실제 서비스에서 사진 분석 성공을 확인함.
 - 남은 주의사항: `OPENAI_API_KEY`는 Secret으로 관리하며, 키 값은 커밋/문서/로그에 기록하지 않는다.
 
+### 2026-04-28 최종 점검 로그
+- 루트 `package.json`의 기본 scripts를 운영 대상인 `vite-react-app`으로 위임하고, Next.js 실행 명령은 `legacy:*`로 분리함.
+- 루트 `wrangler.toml`의 Pages output을 `.vercel/output/static`에서 `vite-react-app/dist`로 변경해 오래된 Next.js 배포 경로를 제거함.
+- 루트 `README.md`와 `vite-react-app/README.md`를 현재 Cloudflare Pages 운영 구조 기준으로 갱신함.
+- Polar checkout API의 기본 성공 URL origin을 이전 Next.js 로컬 주소(`localhost:3000`)가 아니라 현재 요청 origin으로 계산하도록 수정함.
+- Next.js 버전과 Vite 버전의 데이터/타입은 동일함. 컴포넌트 차이는 React Router/Vite 환경 대응, 캐시 실패 방지, Vite 공개 env 이름 변경이 핵심임.
+- 좁은 브라우저 폭에서 홈/결과/업로드 헤더의 한국어 텍스트가 글자 단위로 꺾이지 않도록 버튼/언어 전환 UI에 `whitespace-nowrap`, 헤더 flex wrap, 홈 히어로 `break-keep` 적용.
+- 최종 검증:
+  - 루트 `npm run build`가 `vite-react-app` 빌드로 위임되어 성공
+  - `npx tsc --noEmit` 성공
+  - 로컬 Vite 라우트 `/ko`, `/ko/upload`, `/ko/result`, `/ko/blog`, `/en`, `/ja` 렌더 확인
+  - 로컬 `/api/analyze`가 Vite proxy → Wrangler Pages Functions → OpenAI Vision API까지 도달하는 것 확인
+
 ### 최근 배포 실패 원인 및 해결 여부
-1. **`node:stream` 오류** → `wrangler.toml`에 `compatibility_flags = ["nodejs_compat"]` 추가로 해결 예정 (`c8e7bee`)
-2. **`_redirects` 무한루프** → `_redirects` 삭제하고 `dist/404.html` 방식으로 전환 (`c8e7bee`)
+1. **`node:stream` 오류** → `wrangler.toml`에 `compatibility_flags = ["nodejs_compat"]` 추가 후 해결됨 (`c8e7bee`)
+2. **`_redirects` 무한루프** → `_redirects` 삭제하고 `dist/404.html` 방식으로 전환 후 해결됨 (`c8e7bee`)
 
 ---
 
@@ -167,6 +180,5 @@ pages_build_output_dir = "./dist"
 ## 알려진 이슈 / 주의사항
 
 1. **`src/` 디렉토리 (Next.js)**: 현재 사용 안 하지만 레포에 남아있음. 혼동 주의.
-2. **`vite-react-app/src/lib/ai/classifyFaceType.ts`** 버전이 두 개 있었음 (Next.js 버전 vs Vite 버전). Vite 버전이 더 길고(389줄) 더 최신.
-3. **블로그 기능**: Next.js 버전엔 있었으나 Vite 버전엔 없음. 필요하면 별도 구현 필요.
-4. **다국어(i18n)**: React Router의 `/:locale` 파라미터로 처리 (ko/en 지원).
+2. **루트 기본 scripts**: 현재는 `vite-react-app`으로 위임됨. Next.js 이전 구현을 실행할 때만 `legacy:*` scripts 사용.
+3. **다국어(i18n)**: React Router의 `/:locale` 파라미터로 처리 (ko/en/ja 지원).
