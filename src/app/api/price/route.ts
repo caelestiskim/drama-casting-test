@@ -1,11 +1,9 @@
-export const runtime = "edge";
-
 import { NextResponse } from "next/server";
 
 const POLAR_PRODUCT_ID = process.env.POLAR_PRODUCT_ID ?? "e227714b-0311-4607-93d4-562ed5686b60";
 const POLAR_API_BASE   = process.env.POLAR_API_BASE   ?? "https://sandbox-api.polar.sh";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 // 상품 가격만 조회 — 체크아웃 세션 생성 없이 가격 표시용
 export async function GET() {

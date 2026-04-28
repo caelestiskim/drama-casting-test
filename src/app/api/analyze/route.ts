@@ -1,5 +1,3 @@
-export const runtime = "edge";
-
 import { NextResponse } from "next/server";
 
 import { callVisionAPI } from "@/lib/ai/classifyFaceType";
@@ -8,7 +6,7 @@ import { fallbackClassify } from "@/lib/ai/fallbackClassifier";
 import type { GenderPreference } from "@/types/result";
 
 // nodejs 런타임 유지 — edge는 request body 크기 제한이 있어 큰 이미지 base64 처리 불가
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 type AnalyzeRequestBody = {
   fileName?: string;
