@@ -9,7 +9,7 @@
     "start": "next start",
     "_memo": "NODE_OPTIONS 메모리 제한 필수 — M4 16GB + Turbopack 조합에서 제한 없으면 시스템 크래시",
     "lint": "eslint",
-    "build:cf": "opennextjs-cloudflare build",
+    "build:cf": "opennextjs-cloudflare build && cp .open-next/worker.js .open-next/assets/_worker.js",
     "preview:cf": "opennextjs-cloudflare preview",
     "deploy:cf": "opennextjs-cloudflare build && wrangler pages deploy"
   },
