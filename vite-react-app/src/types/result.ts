@@ -26,7 +26,8 @@ export type CastingResult = {
   faceType: FaceType;
   vector: FaceVector;
   main: CharacterMatch;
-  supports: [CharacterMatch, CharacterMatch];
+  /** 무료: 앞 2개 표시 / 프리미엄: 최대 5개 전부 표시 */
+  supports: CharacterMatch[];
   summary: string;
   isFallback?: boolean;
 };
@@ -64,6 +65,7 @@ export type ResultCopy = {
   shareCopy: string;
   sectionEyebrow: string;
   supportTitle: string;
+  premiumDetail?: string;
 };
 
 export type ShareSnapshot = {

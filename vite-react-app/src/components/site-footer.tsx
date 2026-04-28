@@ -7,10 +7,14 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   const copy = getCopy(locale);
   const footer = copy.footer;
   const year = new Date().getFullYear();
+  const blogLabel =
+    locale === "en" ? "Blog" : locale === "ja" ? "ブログ" : "블로그";
+
   const navItems = [
-    { to: buildLocalePath(locale, "/privacy"), label: footer.privacyTitle },
-    { to: buildLocalePath(locale, "/terms"), label: footer.termsTitle },
-    { to: buildLocalePath(locale, "/about"), label: copy.nav.about },
+    { href: buildLocalePath(locale, "/blog"), label: blogLabel },
+    { href: buildLocalePath(locale, "/about"), label: copy.nav.about },
+    { href: buildLocalePath(locale, "/privacy"), label: footer.privacyTitle },
+    { href: buildLocalePath(locale, "/terms"), label: footer.termsTitle },
   ];
 
   return (
@@ -33,8 +37,8 @@ export function SiteFooter({ locale }: { locale: Locale }) {
           <div className="flex flex-wrap gap-2">
             {navItems.map((item) => (
               <Link
-                key={item.to}
-                to={item.to}
+                key={item.href}
+                to={item.href}
                 className="inline-flex items-center rounded-full border border-violet-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700"
               >
                 {item.label}
