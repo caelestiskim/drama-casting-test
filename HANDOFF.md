@@ -62,7 +62,7 @@ mock-ai-webapp/
 | `e0b1506` | HANDOFF 작업 로그 업데이트 | `main` 푸시 완료 |
 | `00c274c` | 최신 Next.js UI/프리미엄 결과 로직을 실제 배포 대상인 `vite-react-app`으로 이식 | `main` 푸시 완료, 로컬 빌드/타입체크/브라우저 확인 성공 |
 | `8c78b6a` | Vite 앱에 블로그 페이지 추가 | 배포 성공했으나 당시에는 여전히 구버전 UI가 노출됨 |
-| `c8e7bee` | nodejs_compat 추가, 404.html 방식 SPA 라우팅 | **배포 결과 미확인 (대기 중)** |
+| `c8e7bee` | nodejs_compat 추가, 404.html 방식 SPA 라우팅 | 이후 프로덕션 배포 및 분석 동작 확인 완료 |
 | `92e0f09` | 빈 커밋 (설정 변경 후 빌드 트리거용) | node:stream 오류로 실패 |
 | `cc693a0` | vite-react-app에 Cloudflare Pages Functions 추가 | 빌드 성공, 배포 실패 |
 
@@ -89,7 +89,10 @@ mock-ai-webapp/
   - `npm run build` 성공
   - `npx tsc --noEmit` 성공
   - `http://127.0.0.1:5174/api/analyze` 호출 시 `OPENAI_API_KEY` 미설정 오류가 사라지고 OpenAI Vision API까지 요청이 도달하는 것 확인
-- 남은 주의사항: Cloudflare Pages 프로덕션 secret은 CLI 비대화식 환경에서 `CLOUDFLARE_API_TOKEN`이 없어 아직 업데이트하지 못함. 대시보드에서 `OPENAI_API_KEY`를 Secret으로 설정하거나, 토큰을 제공한 뒤 `wrangler pages secret put OPENAI_API_KEY --project-name drama-casting-test`를 실행해야 함.
+- 프로덕션 조치:
+  - Cloudflare Pages 대시보드의 `Variables and Secrets`에 `OPENAI_API_KEY`가 Secret으로 설정됨.
+  - 재배포 후 사용자가 실제 서비스에서 사진 분석 성공을 확인함.
+- 남은 주의사항: `OPENAI_API_KEY`는 Secret으로 관리하며, 키 값은 커밋/문서/로그에 기록하지 않는다.
 
 ### 최근 배포 실패 원인 및 해결 여부
 1. **`node:stream` 오류** → `wrangler.toml`에 `compatibility_flags = ["nodejs_compat"]` 추가로 해결 예정 (`c8e7bee`)
@@ -99,9 +102,8 @@ mock-ai-webapp/
 
 ## 남은 작업
 
-### 1. 배포 확인 (`00c274c` 빌드 결과 확인)
-- Cloudflare Pages 대시보드에서 `00c274c` 빌드 로그 확인
-- 성공하면 실제 URL 접속 테스트
+### 1. 배포 확인
+- 완료: Cloudflare Pages 재배포 후 실제 사진 분석 성공 확인됨.
 
 ### 2. 만약 또 실패하면
 - **`node:stream` 오류 지속 시**: `vite-react-app/functions/api/analyze.ts`가 AI 라이브러리를 직접 import 중. 해당 라이브러리에서 node:stream을 사용하는 코드를 찾아 제거하거나, 함수 내에 AI 로직을 인라인으로 작성 (fetch만 사용)
