@@ -1,13 +1,9 @@
 name = "drama-casting-test"
-main = ".worker-next/index.mjs"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
 
-[assets]
-directory = ".worker-next/assets"
-run_worker_first = true
-
-# 환경 변수는 Cloudflare 대시보드에서 설정하세요:
+# 환경 변수는 Cloudflare Pages 대시보드에서 설정하세요:
 #   Settings → Environment Variables
 #   - OPENAI_API_KEY  (필수, Secret으로 설정 권장)
 #   - OPENAI_MODEL    (선택, 기본값: gpt-4.1-mini)

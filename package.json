@@ -9,7 +9,7 @@
     "start": "next start",
     "_memo": "NODE_OPTIONS 메모리 제한 필수 — M4 16GB + Turbopack 조합에서 제한 없으면 시스템 크래시",
     "lint": "eslint",
-    "build:cf": "opennextjs-cloudflare build && cp .open-next/worker.js .open-next/assets/_worker.js",
+    "build:cf": "next build && npx @cloudflare/next-on-pages",
     "preview:cf": "opennextjs-cloudflare preview",
     "deploy:cf": "opennextjs-cloudflare build && wrangler pages deploy"
   },
@@ -23,6 +23,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@opennextjs/cloudflare": "^1.19.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

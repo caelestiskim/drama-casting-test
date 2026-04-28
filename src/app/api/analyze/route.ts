@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { NextResponse } from "next/server";
 
 import { callVisionAPI } from "@/lib/ai/classifyFaceType";

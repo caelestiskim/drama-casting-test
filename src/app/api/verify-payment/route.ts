@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { type NextRequest, NextResponse } from "next/server";
 
 const POLAR_API_BASE = process.env.POLAR_API_BASE ?? "https://sandbox-api.polar.sh";

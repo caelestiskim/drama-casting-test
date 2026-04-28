@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { NextResponse } from "next/server";
 
 const POLAR_PRODUCT_ID = process.env.POLAR_PRODUCT_ID ?? "e227714b-0311-4607-93d4-562ed5686b60";
