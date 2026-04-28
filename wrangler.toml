@@ -1,7 +1,11 @@
-name = "mock-ai-webapp"
+name = "drama-casting-test"
+main = ".worker-next/index.mjs"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".open-next/assets"
+
+[assets]
+directory = ".worker-next/assets"
+run_worker_first = true
 
 # 환경 변수는 Cloudflare 대시보드에서 설정하세요:
 #   Settings → Environment Variables
