@@ -531,6 +531,21 @@ type AnalyzeApiResponse = {
   _debug?: { error: string };
 };
 
+type CachedCastingResult = {
+  fp: string;
+  result: CastingResult;
+  fileName: string;
+  debugError: string | null;
+};
+
+function isReusableCachedResult(cache: CachedCastingResult, imageFingerprint: string) {
+  return (
+    cache.fp === imageFingerprint &&
+    !cache.result.isFallback &&
+    !cache.debugError
+  );
+}
+
 // ─────────────────────────────────────────────────────────────
 // FaceType 한국어 레이블
 // ─────────────────────────────────────────────────────────────
@@ -713,13 +728,8 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
       const rawCache = window.sessionStorage.getItem(CASTING_RESULT_CACHE_KEY);
       if (rawCache) {
         try {
-          const cache = JSON.parse(rawCache) as {
-            fp: string;
-            result: CastingResult;
-            fileName: string;
-            debugError: string | null;
-          };
-          if (cache.fp === imageFingerprint) {
+          const cache = JSON.parse(rawCache) as CachedCastingResult;
+          if (isReusableCachedResult(cache, imageFingerprint)) {
             // 캐시 유효 → API 호출 없이 즉시 결과 표시 (AnalyzingScreen 없음)
             if (!cancelled) {
               setResult(cache.result);
@@ -730,7 +740,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
             }
             return;
           }
-          // 다른 이미지의 캐시 → 삭제
+          // 다른 이미지 또는 실패/fallback 결과 캐시 → 삭제 후 재분석
           window.sessionStorage.removeItem(CASTING_RESULT_CACHE_KEY);
         } catch {
           window.sessionStorage.removeItem(CASTING_RESULT_CACHE_KEY);
@@ -760,18 +770,23 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
           setFileName(storedFileName);
           setApiDebugError(payload._debug?.error ?? null);
 
-          // 캐시 저장 (성별 제외 — 항상 sessionStorage에서 새로 읽음)
-          try {
-            window.sessionStorage.setItem(
-              CASTING_RESULT_CACHE_KEY,
-              JSON.stringify({
-                fp: imageFingerprint,
-                result: payload.result,
-                fileName: storedFileName,
-                debugError: payload._debug?.error ?? null,
-              }),
-            );
-          } catch { /* 용량 초과 등 무시 */ }
+          // 성공 분석만 캐시한다. 실패/fallback 결과를 캐시하면 env/API 키 수정 후에도
+          // 같은 사진에서 이전 오류가 계속 표시된다.
+          if (!payload.result.isFallback && !payload._debug?.error) {
+            try {
+              window.sessionStorage.setItem(
+                CASTING_RESULT_CACHE_KEY,
+                JSON.stringify({
+                  fp: imageFingerprint,
+                  result: payload.result,
+                  fileName: storedFileName,
+                  debugError: null,
+                }),
+              );
+            } catch { /* 용량 초과 등 무시 */ }
+          } else {
+            window.sessionStorage.removeItem(CASTING_RESULT_CACHE_KEY);
+          }
 
           setPhase("done");
         }
