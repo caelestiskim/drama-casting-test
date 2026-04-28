@@ -56,9 +56,23 @@ mock-ai-webapp/
 ### 최근 커밋 이력
 | 커밋 | 내용 | 결과 |
 |------|------|------|
+| `00c274c` | 최신 Next.js UI/프리미엄 결과 로직을 실제 배포 대상인 `vite-react-app`으로 이식 | `main` 푸시 완료, 로컬 빌드/타입체크/브라우저 확인 성공 |
+| `8c78b6a` | Vite 앱에 블로그 페이지 추가 | 배포 성공했으나 당시에는 여전히 구버전 UI가 노출됨 |
 | `c8e7bee` | nodejs_compat 추가, 404.html 방식 SPA 라우팅 | **배포 결과 미확인 (대기 중)** |
 | `92e0f09` | 빈 커밋 (설정 변경 후 빌드 트리거용) | node:stream 오류로 실패 |
 | `cc693a0` | vite-react-app에 Cloudflare Pages Functions 추가 | 빌드 성공, 배포 실패 |
+
+### 2026-04-28 Codex 작업 로그
+- 문제 원인: Cloudflare Pages 실제 배포 대상은 `vite-react-app`인데, 최신 디자인/결과 UI는 루트 `src/`의 Next.js 앱 및 `claude/*` 브랜치 쪽에 남아 있었음. 그래서 `main` 배포가 성공해도 구버전 Vite UI가 계속 보였음.
+- 조치: 루트 Next.js 앱의 최신 홈/업로드/결과 UI, 프리미엄 결과 표시, 결제 CTA, 포스터 카드, 캐릭터 번역/필터/참조 데이터, 결과 캐시 로직을 `vite-react-app`의 React Router 구조에 맞게 이식.
+- 추가 의존성: `vite-react-app/package.json`에 `html-to-image` 추가.
+- 푸시 완료: `main` 브랜치 `00c274c` (`Port latest UI to Vite deployment`)가 `origin/main`에 올라감.
+- 검증:
+  - `npm run build` 성공
+  - `npx tsc --noEmit` 성공
+  - 로컬 브라우저에서 `http://127.0.0.1:5174/ko`, `/ko/upload`, `/ko/blog`, `/ko/result` 렌더 확인
+  - 확인 당시 브라우저 콘솔 에러 없음
+- 검증용 Vite dev server는 종료함.
 
 ### 최근 배포 실패 원인 및 해결 여부
 1. **`node:stream` 오류** → `wrangler.toml`에 `compatibility_flags = ["nodejs_compat"]` 추가로 해결 예정 (`c8e7bee`)
@@ -68,8 +82,8 @@ mock-ai-webapp/
 
 ## 남은 작업
 
-### 1. 배포 확인 (c8e7bee 빌드 결과 확인)
-- Cloudflare Pages 대시보드에서 `c8e7bee` 빌드 로그 확인
+### 1. 배포 확인 (`00c274c` 빌드 결과 확인)
+- Cloudflare Pages 대시보드에서 `00c274c` 빌드 로그 확인
 - 성공하면 실제 URL 접속 테스트
 
 ### 2. 만약 또 실패하면
