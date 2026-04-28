@@ -56,6 +56,10 @@ mock-ai-webapp/
 ### 최근 커밋 이력
 | 커밋 | 내용 | 결과 |
 |------|------|------|
+| `00ae957` | 이전 브라우저 세션에 남은 실패 분석 캐시를 무시하도록 결과 캐시 키 변경 | 로컬 빌드/타입체크/API 키 로딩 확인 성공 |
+| `202bcd9` | 실패/폴백 분석 결과를 세션 캐시에 저장하지 않도록 수정, Vite dev proxy를 Wrangler Functions로 연결 | `main` 푸시 완료, 로컬 빌드/타입체크 성공 |
+| `b2209ee` | 로컬 비밀값 파일(`.dev.vars`, `.env*`) 및 Wrangler 임시 파일 ignore 처리 | `main` 푸시 완료 |
+| `e0b1506` | HANDOFF 작업 로그 업데이트 | `main` 푸시 완료 |
 | `00c274c` | 최신 Next.js UI/프리미엄 결과 로직을 실제 배포 대상인 `vite-react-app`으로 이식 | `main` 푸시 완료, 로컬 빌드/타입체크/브라우저 확인 성공 |
 | `8c78b6a` | Vite 앱에 블로그 페이지 추가 | 배포 성공했으나 당시에는 여전히 구버전 UI가 노출됨 |
 | `c8e7bee` | nodejs_compat 추가, 404.html 방식 SPA 라우팅 | **배포 결과 미확인 (대기 중)** |
@@ -73,6 +77,19 @@ mock-ai-webapp/
   - 로컬 브라우저에서 `http://127.0.0.1:5174/ko`, `/ko/upload`, `/ko/blog`, `/ko/result` 렌더 확인
   - 확인 당시 브라우저 콘솔 에러 없음
 - 검증용 Vite dev server는 종료함.
+
+### 2026-04-28 Codex 추가 작업 로그
+- 문제 원인: 로컬 Pages Functions 실행 시 `vite-react-app/.dev.vars`에 `OPENAI_API_KEY`가 없어 사진 분석이 fallback으로 내려갔고, 실패한 fallback 결과가 `sessionStorage` 캐시에 남아 이후 새 키를 넣어도 결과 화면에서 같은 오류가 반복 표시됨.
+- 조치:
+  - 로컬 개발용 `vite-react-app/.dev.vars`에 OpenAI 키를 설정함. 키 값은 커밋/문서에 기록하지 않음.
+  - 실패/폴백 분석 결과는 더 이상 `sessionStorage`에 저장하지 않도록 수정함 (`202bcd9`).
+  - 기존 브라우저에 남아 있던 실패 캐시를 무시하도록 결과 캐시 키를 `drama-casting-test.result-cache.v2`로 변경함.
+  - Vite dev server의 `/api` 요청을 Wrangler Pages Functions(`127.0.0.1:8788`)로 프록시하도록 설정함 (`202bcd9`).
+- 검증:
+  - `npm run build` 성공
+  - `npx tsc --noEmit` 성공
+  - `http://127.0.0.1:5174/api/analyze` 호출 시 `OPENAI_API_KEY` 미설정 오류가 사라지고 OpenAI Vision API까지 요청이 도달하는 것 확인
+- 남은 주의사항: Cloudflare Pages 프로덕션 secret은 CLI 비대화식 환경에서 `CLOUDFLARE_API_TOKEN`이 없어 아직 업데이트하지 못함. 대시보드에서 `OPENAI_API_KEY`를 Secret으로 설정하거나, 토큰을 제공한 뒤 `wrangler pages secret put OPENAI_API_KEY --project-name drama-casting-test`를 실행해야 함.
 
 ### 최근 배포 실패 원인 및 해결 여부
 1. **`node:stream` 오류** → `wrangler.toml`에 `compatibility_flags = ["nodejs_compat"]` 추가로 해결 예정 (`c8e7bee`)
