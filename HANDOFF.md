@@ -94,6 +94,27 @@ mock-ai-webapp/
   - 재배포 후 사용자가 실제 서비스에서 사진 분석 성공을 확인함.
 - 남은 주의사항: `OPENAI_API_KEY`는 Secret으로 관리하며, 키 값은 커밋/문서/로그에 기록하지 않는다.
 
+### 2026-05-06 Claude 작업 로그
+
+#### 애널리틱스 연동
+- **Cloudflare Web Analytics** 비콘 스크립트를 `vite-react-app/index.html` `<head>`에 추가 (token: `06e2f5f95a644d089e797c25401a99c4`)
+- **Google Analytics GA4** 트래킹 스크립트 추가 (Measurement ID: `G-919S07HKV9`)
+  - GA4 property name: Drama Casting Test
+  - 카테고리: Arts & Entertainment
+  - 통화: USD, 지역: United States
+  - ToS: United States 기준으로 동의
+- 두 스크립트 모두 `index.html`에 공존하며 독립적으로 작동
+- 커밋 `d60eab1` (`Add Google Analytics GA4 tracking script (G-919S07HKV9)`) → `main` 푸시 완료
+
+#### 기타 확인 사항
+- Cloudflare Web Analytics 데이터 확인: Visits 533, Requests 2.24k (최근 7일 기준)
+  - 상위 트래픽 출처가 Netherlands, US 등 → 봇/크롤러 트래픽으로 판단
+  - 실제 사용자 유입은 아직 미미한 수준 (홍보 전)
+- GitHub 레포 공개 여부 확인 필요 (private 권장)
+- 사이트는 작업 중에도 열어둔 상태 유지 중 (닫을 필요 없음)
+
+---
+
 ### 2026-04-28 최종 점검 로그
 - 루트 `package.json`의 기본 scripts를 운영 대상인 `vite-react-app`으로 위임하고, Next.js 실행 명령은 `legacy:*`로 분리함.
 - 루트 `wrangler.toml`의 Pages output을 `.vercel/output/static`에서 `vite-react-app/dist`로 변경해 오래된 Next.js 배포 경로를 제거함.
