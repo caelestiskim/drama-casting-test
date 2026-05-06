@@ -6,6 +6,8 @@ pages_build_output_dir = "./dist"
 [vars]
 POLAR_API_BASE = "https://api.polar.sh"
 POLAR_PRODUCT_ID = "768ba054-07e3-4e59-a263-f83fcb2fc417"
+POLAR_PRICE_AMOUNT = "99"
+POLAR_PRICE_CURRENCY = "usd"
 
 # Secrets are configured in Cloudflare Pages:
 #   - OPENAI_API_KEY

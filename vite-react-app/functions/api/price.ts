@@ -2,6 +2,8 @@ interface Env {
   POLAR_ACCESS_TOKEN?: string;
   POLAR_PRODUCT_ID?: string;
   POLAR_API_BASE?: string;
+  POLAR_PRICE_AMOUNT?: string;
+  POLAR_PRICE_CURRENCY?: string;
 }
 
 function json(data: unknown, status = 200): Response {
@@ -20,10 +22,14 @@ export async function onRequestGet(context: {
 
   const POLAR_PRODUCT_ID = env.POLAR_PRODUCT_ID ?? "e227714b-0311-4607-93d4-562ed5686b60";
   const POLAR_API_BASE = env.POLAR_API_BASE ?? "https://sandbox-api.polar.sh";
+  const fallbackPrice = {
+    amount: env.POLAR_PRICE_AMOUNT ? Number(env.POLAR_PRICE_AMOUNT) : null,
+    currency: env.POLAR_PRICE_CURRENCY ?? null,
+  };
 
   const token = env.POLAR_ACCESS_TOKEN;
   if (!token) {
-    return json({ amount: null, currency: null });
+    return json(fallbackPrice);
   }
 
   try {
@@ -32,7 +38,7 @@ export async function onRequestGet(context: {
     });
 
     if (!res.ok) {
-      return json({ amount: null, currency: null });
+      return json(fallbackPrice);
     }
 
     const product = (await res.json()) as {
@@ -45,6 +51,6 @@ export async function onRequestGet(context: {
       currency: first?.price_currency ?? null,
     });
   } catch {
-    return json({ amount: null, currency: null });
+    return json(fallbackPrice);
   }
 }
