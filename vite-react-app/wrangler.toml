@@ -3,11 +3,10 @@ compatibility_date = "2026-04-15"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./dist"
 
-# 환경 변수는 Cloudflare Pages 대시보드에서 설정하세요:
-#   Settings → Environment Variables
-#   - OPENAI_API_KEY       (필수, Secret으로 설정)
-#   - OPENAI_MODEL         (선택, 기본값: gpt-4o-mini)
-#   - AI_MOCK_MODE         (선택, 로컬 테스트 시에만 "true")
-#   - POLAR_ACCESS_TOKEN   (선택, 결제 기능 사용 시)
-#   - POLAR_PRODUCT_ID     (선택)
-#   - POLAR_API_BASE       (선택, sandbox: https://sandbox-api.polar.sh)
+[vars]
+POLAR_API_BASE = "https://api.polar.sh"
+POLAR_PRODUCT_ID = "768ba054-07e3-4e59-a263-f83fcb2fc417"
+
+# Secrets are configured in Cloudflare Pages:
+#   - OPENAI_API_KEY
+#   - POLAR_ACCESS_TOKEN
