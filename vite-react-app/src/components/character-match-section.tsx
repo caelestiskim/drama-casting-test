@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toJpeg } from "html-to-image";
 
@@ -585,6 +586,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
   const urlSessionId = searchParams.get("session_id");
   const [isPaid, setIsPaid] = useState(false);
   const [paymentChecked, setPaymentChecked] = useState(false);
+  const [verifiedSessionId, setVerifiedSessionId] = useState<string | null>(null);
   const [debugPayment, setDebugPayment] = useState<{ sessionId: string | null; source: string; status: string; raw: string } | null>(null);
 
   useEffect(() => {
@@ -611,6 +613,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
     const cached = sessionStorage.getItem(cacheKey);
     if (cached === "1") {
       setIsPaid(true);
+      setVerifiedSessionId(sessionId);
       setPaymentChecked(true);
       localStorage.removeItem("polar_pending_session_id");
       setDebugPayment({ sessionId, source, status: "cached ✅ isPaid=true", raw: "" });
@@ -623,6 +626,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
         setDebugPayment({ sessionId, source, status: `polar status="${data.status}" isPaid=${data.isPaid}`, raw: JSON.stringify(data) });
         if (data.isPaid) {
           setIsPaid(true);
+          setVerifiedSessionId(sessionId);
           sessionStorage.setItem(cacheKey, "1");
           localStorage.removeItem("polar_pending_session_id");
         }
@@ -642,6 +646,9 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
   const [message, setMessage] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailStatus, setEmailStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [emailMessage, setEmailMessage] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadImage = async () => {
@@ -857,6 +864,97 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
   }
 
   const typeLabel = faceTypeLabels[result.faceType]?.[locale] ?? faceTypeLabels[result.faceType]?.ko ?? result.faceType;
+  const mainCharacterLabel = getCharacterL10n(
+    result.main.character.id,
+    result.main.character.name,
+    result.main.character.title,
+    result.main.character.shortDescription,
+    locale,
+  );
+
+  const handleSendEmail = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!verifiedSessionId || emailStatus === "sending") return;
+
+    const trimmedEmail = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setEmailStatus("error");
+      setEmailMessage(
+        locale === "en"
+          ? "Please enter a valid email address."
+          : locale === "ja"
+            ? "有効なメールアドレスを入力してください。"
+            : "올바른 이메일 주소를 입력해 주세요.",
+      );
+      return;
+    }
+
+    setEmailStatus("sending");
+    setEmailMessage(null);
+
+    try {
+      const res = await fetch("/api/send-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          locale,
+          sessionId: verifiedSessionId,
+          report: {
+            title: ui.headerTitle,
+            mainName: mainCharacterLabel.name,
+            mainTitle: mainCharacterLabel.title,
+            heroSummary: copy.heroSummary,
+            oneLiner: copy.oneLiner,
+            shareCopy: copy.shareCopy,
+            faceTypeLabel: typeLabel,
+            matchScore: result.main.matchScore,
+            vector: result.vector,
+            supports: result.supports.map((item) => {
+              const l10n = getCharacterL10n(
+                item.character.id,
+                item.character.name,
+                item.character.title,
+                item.character.shortDescription,
+                locale,
+              );
+              return {
+                name: l10n.name,
+                title: l10n.title,
+                matchScore: item.matchScore,
+              };
+            }),
+            works: references.works,
+            actors: references.actors,
+            shareUrl,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`send-report failed: ${res.status}`);
+      }
+
+      setEmailStatus("sent");
+      setEmailMessage(
+        locale === "en"
+          ? "Report sent. Please check your inbox."
+          : locale === "ja"
+            ? "レポートを送信しました。受信箱をご確認ください。"
+            : "리포트를 보냈어요. 받은 편지함을 확인해 주세요.",
+      );
+    } catch (err) {
+      console.error("[send-report]", err);
+      setEmailStatus("error");
+      setEmailMessage(
+        locale === "en"
+          ? "Couldn't send the report. Please try again."
+          : locale === "ja"
+            ? "レポートを送信できませんでした。もう一度お試しください。"
+            : "리포트 전송에 실패했어요. 다시 시도해 주세요.",
+      );
+    }
+  };
 
   return (
     <section className="overflow-hidden rounded-[2.4rem] border border-pink-100 bg-white/94 shadow-[0_30px_100px_rgba(236,72,153,0.09)]">
@@ -1248,6 +1346,67 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
                 </p>
               )}
             </div>
+          )}
+
+          {/* 리포트 이메일 전송 — 프리미엄 유저만 */}
+          {isPaid && (
+            <section className="rounded-[1.9rem] border border-indigo-100 bg-[linear-gradient(180deg,#f8f7ff_0%,#ffffff_100%)] p-5 shadow-sm">
+              <p className="text-sm font-semibold tracking-[0.18em] text-indigo-600">
+                {locale === "en" ? "EMAIL REPORT" : locale === "ja" ? "メールで受け取る" : "이메일로 리포트 받기"}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                {locale === "en"
+                  ? "Send this premium report to your inbox."
+                  : locale === "ja"
+                    ? "このプレミアムレポートをメールで送信します。"
+                    : "프리미엄 리포트를 입력한 이메일로 보내드려요."}
+              </p>
+              <form onSubmit={handleSendEmail} className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    if (emailStatus !== "sending") {
+                      setEmailStatus("idle");
+                      setEmailMessage(null);
+                    }
+                  }}
+                  placeholder={
+                    locale === "en"
+                      ? "you@example.com"
+                      : locale === "ja"
+                        ? "you@example.com"
+                        : "you@example.com"
+                  }
+                  className="min-h-12 flex-1 rounded-full border border-indigo-100 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                  disabled={emailStatus === "sending" || !verifiedSessionId}
+                />
+                <button
+                  type="submit"
+                  disabled={emailStatus === "sending" || !verifiedSessionId}
+                  className="min-h-12 rounded-full bg-indigo-600 px-5 text-sm font-semibold text-white shadow-[0_8px_22px_rgba(79,70,229,0.22)] transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {emailStatus === "sending"
+                    ? (locale === "en" ? "Sending..." : locale === "ja" ? "送信中..." : "전송 중...")
+                    : (locale === "en" ? "Send" : locale === "ja" ? "送信" : "보내기")}
+                </button>
+              </form>
+              {!verifiedSessionId && (
+                <p className="mt-2 text-xs text-amber-600">
+                  {locale === "en"
+                    ? "Email sending becomes available after payment verification finishes."
+                    : locale === "ja"
+                      ? "決済確認が完了するとメール送信を利用できます。"
+                      : "결제 확인이 끝나면 이메일 전송을 사용할 수 있어요."}
+                </p>
+              )}
+              {emailMessage && (
+                <p className={`mt-2 text-xs ${emailStatus === "sent" ? "text-emerald-600" : "text-red-500"}`}>
+                  {emailMessage}
+                </p>
+              )}
+            </section>
           )}
 
           {/* 작품 레퍼런스 */}
