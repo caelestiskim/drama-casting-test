@@ -14,6 +14,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
     { href: buildLocalePath(locale, "/blog"), label: blogLabel },
     { href: buildLocalePath(locale, "/about"), label: copy.nav.about },
     { href: buildLocalePath(locale, "/privacy"), label: footer.privacyTitle },
+    { href: buildLocalePath(locale, "/refund"), label: footer.refundTitle },
     { href: buildLocalePath(locale, "/terms"), label: footer.termsTitle },
   ];
 

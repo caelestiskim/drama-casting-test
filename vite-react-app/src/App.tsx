@@ -5,6 +5,7 @@ import { BlogPage } from "@/pages/BlogPage";
 import { BlogPostPage } from "@/pages/BlogPostPage";
 import { HomePage } from "@/pages/HomePage";
 import { PrivacyPage } from "@/pages/PrivacyPage";
+import { RefundPage } from "@/pages/RefundPage";
 import { ResultPage } from "@/pages/ResultPage";
 import { TermsPage } from "@/pages/TermsPage";
 import { UploadPage } from "@/pages/UploadPage";
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="blog" element={<BlogPage />} />
         <Route path="blog/:slug" element={<BlogPostPage />} />
         <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="refund" element={<RefundPage />} />
         <Route path="terms" element={<TermsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/ko" replace />} />

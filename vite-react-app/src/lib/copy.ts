@@ -9,6 +9,7 @@ export const pageCopy = {
       retry: "다시 테스트하기",
       about: "서비스 소개",
       privacy: "개인정보처리방침",
+      refund: "환불 규정",
       terms: "이용약관",
     },
     localeNames: {
@@ -137,6 +138,7 @@ export const pageCopy = {
     footer: {
       privacyTitle: "개인정보 안내",
       privacyBody: "업로드한 사진은 결과 생성에만 잠깐 쓰고 장기 저장하지 않습니다.",
+      refundTitle: "환불 규정",
       termsTitle: "이용약관",
       termsBody: "이 서비스는 순수 오락 목적의 캐릭터 테스트이며, 인상·외모에 관한 과학적 분석이나 진단 서비스가 아닙니다. 언급된 배우 및 작품은 본 서비스와 무관합니다.",
       contactTitle: "문의",
@@ -280,7 +282,7 @@ export const pageCopy = {
             "본 서비스는 Google AdSense를 통해 광고를 제공합니다. Google은 쿠키를 사용하여 이용자의 이전 방문 기록을 바탕으로 관심 기반 광고를 표시합니다.",
             "이용자는 Google 광고 설정(adssettings.google.com)에서 개인화 광고를 비활성화할 수 있습니다.",
             "브라우저 설정에서 쿠키를 거부할 수 있으나, 일부 서비스 기능이 제한될 수 있습니다.",
-            "Google Analytics 등 분석 도구는 현재 사용하지 않습니다. 향후 도입 시 본 방침에 반영합니다.",
+            "Google Analytics를 통해 집계된 서비스 방문 흐름을 파악하고 사용자 경험을 개선합니다.",
           ],
         },
         {
@@ -298,6 +300,45 @@ export const pageCopy = {
             "문의 이메일: caelestis@empas.com",
             "요청 수신 후 영업일 기준 7일 이내 답변드립니다.",
             "본 방침은 법령 변경 또는 서비스 변경에 따라 개정될 수 있으며, 개정 시 서비스 내 공지를 통해 안내합니다.",
+          ],
+        },
+      ],
+    },
+    refundPage: {
+      title: "환불 규정",
+      intro:
+        "본 환불 규정은 드라마 캐스팅 테스트의 유료 프리미엄 결과 이용권에 적용됩니다. 결제는 Polar를 통해 처리되며, 본 서비스는 카드번호 등 결제 수단 정보를 직접 보관하지 않습니다. 시행일: 2025년 3월 1일",
+      sections: [
+        {
+          title: "1. 상품 및 결제 방식",
+          bullets: [
+            "프리미엄 결과 이용권은 일회성 결제 상품이며 정기 구독이 아닙니다.",
+            "결제 완료 후 이용자는 AI 기반 드라마 캐릭터 분석 결과, 캐릭터 유형, 인상 키워드, 스타일 키워드, 공유용 결과 페이지를 이용할 수 있습니다.",
+            "모든 결제는 Polar Checkout을 통해 처리되며, Polar의 결제 및 환불 처리 절차가 함께 적용될 수 있습니다.",
+          ],
+        },
+        {
+          title: "2. 환불이 가능한 경우",
+          bullets: [
+            "결제는 완료되었으나 서비스 오류로 프리미엄 결과가 정상적으로 제공되지 않은 경우 전액 환불을 요청할 수 있습니다.",
+            "중복 결제가 발생한 경우 중복 결제분에 대해 환불을 요청할 수 있습니다.",
+            "환불 요청은 결제일로부터 7일 이내에 결제 이메일, 결제 시각, 가능한 경우 Polar 영수증 또는 거래 ID를 포함해 caelestis@empas.com으로 보내주세요.",
+          ],
+        },
+        {
+          title: "3. 환불이 제한되는 경우",
+          bullets: [
+            "프리미엄 결과가 정상적으로 화면에 표시된 이후에는 디지털 콘텐츠가 즉시 제공된 것으로 보아 단순 변심 환불이 제한됩니다.",
+            "이용자의 네트워크 환경, 브라우저 설정, 기기 문제, 잘못된 사진 선택 등 서비스 외부 요인으로 인한 불만족은 환불 사유에 해당하지 않을 수 있습니다.",
+            "결과는 엔터테인먼트 목적의 AI 추천이며, 특정 배우와 닮음 여부나 결과 만족도를 보장하지 않습니다.",
+          ],
+        },
+        {
+          title: "4. 처리 기간 및 문의",
+          bullets: [
+            "환불 요청을 받으면 영업일 기준 7일 이내에 확인 후 답변합니다.",
+            "승인된 환불은 Polar의 결제 처리 일정에 따라 원 결제 수단으로 반환됩니다.",
+            "문의 이메일: caelestis@empas.com",
           ],
         },
       ],
@@ -379,7 +420,7 @@ export const pageCopy = {
     },
   },
   en: {
-    nav: { start: "Start", home: "Home", backHome: "Back to Home", retry: "Try Again", about: "About", privacy: "Privacy", terms: "Terms" },
+    nav: { start: "Start", home: "Home", backHome: "Back to Home", retry: "Try Again", about: "About", privacy: "Privacy", refund: "Refund Policy", terms: "Terms" },
     localeNames: { ko: "한국어", en: "English", ja: "日本語" },
     home: {
       eyebrow: "DRAMA CASTING TEST",
@@ -496,6 +537,7 @@ export const pageCopy = {
     footer: {
       privacyTitle: "Privacy",
       privacyBody: "Uploaded photos are only used briefly to generate the result and are not stored long-term.",
+      refundTitle: "Refund Policy",
       termsTitle: "Terms",
       termsBody: "This service is for entertainment purposes only and is not a scientific analysis or diagnosis of appearance. All actors and works mentioned are unrelated to this service.",
       contactTitle: "Contact",
@@ -656,6 +698,45 @@ export const pageCopy = {
         },
       ],
     },
+    refundPage: {
+      title: "Refund Policy",
+      intro:
+        "This Refund Policy applies to the paid premium result access for Drama Casting Test. Payments are processed by Polar, and this Service does not directly store card numbers or payment method details. Effective date: March 1, 2025",
+      sections: [
+        {
+          title: "1. Product and Payment Model",
+          bullets: [
+            "Premium result access is a one-time payment product and is not a subscription.",
+            "After successful payment, users receive access to an AI-powered Korean drama character-style result, including character type, personality impression, style keywords, and a shareable result page.",
+            "All payments are processed through Polar Checkout. Polar's payment and refund handling procedures may also apply.",
+          ],
+        },
+        {
+          title: "2. Eligible Refunds",
+          bullets: [
+            "If payment succeeds but the Service fails to deliver the premium result due to a technical error or system fault, you may request a full refund.",
+            "If a duplicate payment occurs, you may request a refund for the duplicate charge.",
+            "Refund requests must be sent within 7 days of payment to caelestis@empas.com and should include the payment email, payment time, and, if available, the Polar receipt or transaction ID.",
+          ],
+        },
+        {
+          title: "3. Non-Refundable Cases",
+          bullets: [
+            "Once the premium result has been successfully displayed, the digital content is considered delivered and refunds for change of mind are generally not available.",
+            "Issues caused by the user's network, browser settings, device environment, or photo choice may not qualify for a refund.",
+            "Results are AI-generated entertainment recommendations. The Service does not guarantee a specific actor match, a specific character outcome, or user satisfaction with the result.",
+          ],
+        },
+        {
+          title: "4. Processing Time and Contact",
+          bullets: [
+            "We will review refund requests and respond within 7 business days.",
+            "Approved refunds are returned to the original payment method according to Polar's payment processing timeline.",
+            "Contact: caelestis@empas.com",
+          ],
+        },
+      ],
+    },
     termsPage: {
       title: "Terms of Service",
       intro:
@@ -731,7 +812,7 @@ export const pageCopy = {
     },
   },
   ja: {
-    nav: { start: "はじめる", home: "ホーム", backHome: "ホームへ", retry: "もう一度試す", about: "サービス紹介", privacy: "プライバシー", terms: "利用規約" },
+    nav: { start: "はじめる", home: "ホーム", backHome: "ホームへ", retry: "もう一度試す", about: "サービス紹介", privacy: "プライバシー", refund: "返金ポリシー", terms: "利用規約" },
     localeNames: { ko: "한국어", en: "English", ja: "日本語" },
     home: {
       eyebrow: "DRAMA CASTING TEST",
@@ -848,6 +929,7 @@ export const pageCopy = {
     footer: {
       privacyTitle: "プライバシー",
       privacyBody: "アップロードした写真は結果生成のために短時間だけ使い、長期保存はしません。",
+      refundTitle: "返金ポリシー",
       termsTitle: "利用規約",
       termsBody: "このサービスはエンタメ向けのキャラクターおすすめであり、診断や判定を行うものではありません。",
       contactTitle: "お問い合わせ",
@@ -987,7 +1069,7 @@ export const pageCopy = {
             "本サービスはGoogle AdSenseを通じて広告を提供します。Googleはお客様の過去の訪問履歴に基づいてインタレストベース広告を表示するためにCookieを使用します",
             "Google広告設定（adssettings.google.com）からいつでもパーソナライズ広告を無効にできます",
             "ブラウザ設定でCookieを拒否することもできますが、一部のサービス機能が制限される場合があります",
-            "現在Google Analyticsなどの解析ツールは使用していません。今後導入する場合は本ポリシーに反映します",
+            "Google Analyticsを使用し、集計されたサービス利用状況を把握してユーザー体験を改善します",
           ],
         },
         {
@@ -1004,6 +1086,45 @@ export const pageCopy = {
             "個人情報保護責任者：サービス運営者",
             "メールアドレス：caelestis@empas.com",
             "本ポリシーは法令変更またはサービス変更に伴い改訂されることがあります。改訂時はサービス内でお知らせします。",
+          ],
+        },
+      ],
+    },
+    refundPage: {
+      title: "返金ポリシー",
+      intro:
+        "本返金ポリシーは、Drama Casting Testの有料プレミアム結果アクセスに適用されます。決済はPolarを通じて処理され、本サービスはカード番号などの決済手段情報を直接保存しません。施行日：2025年3月1日",
+      sections: [
+        {
+          title: "1. 商品と決済方式",
+          bullets: [
+            "プレミアム結果アクセスは一回払いの商品であり、定期購読ではありません",
+            "決済完了後、利用者はAIによるドラマキャラクター風の結果、キャラクタータイプ、印象キーワード、スタイルキーワード、共有用結果ページを利用できます",
+            "すべての決済はPolar Checkoutを通じて処理され、Polarの決済および返金処理手続きも適用される場合があります",
+          ],
+        },
+        {
+          title: "2. 返金可能な場合",
+          bullets: [
+            "決済が完了したにもかかわらず、本サービスの技術的エラーまたはシステム不具合によりプレミアム結果が正常に提供されなかった場合、全額返金を申請できます",
+            "重複決済が発生した場合、重複分の返金を申請できます",
+            "返金申請は決済日から7日以内に、決済メールアドレス、決済時刻、可能であればPolarの領収書または取引IDを添えて caelestis@empas.com までご連絡ください",
+          ],
+        },
+        {
+          title: "3. 返金が制限される場合",
+          bullets: [
+            "プレミアム結果が正常に表示された後は、デジタルコンテンツが提供済みとみなされ、単純な心変わりによる返金は原則としてできません",
+            "利用者のネットワーク環境、ブラウザ設定、端末環境、写真選択に起因する問題は返金対象外となる場合があります",
+            "結果はAIによるエンタメ向けおすすめです。特定の俳優との一致、特定のキャラクター結果、利用者の満足度を保証するものではありません",
+          ],
+        },
+        {
+          title: "4. 処理期間とお問い合わせ",
+          bullets: [
+            "返金申請を受領後、営業日7日以内に確認して返信します",
+            "承認された返金は、Polarの決済処理スケジュールに従って元の決済手段へ返金されます",
+            "お問い合わせ：caelestis@empas.com",
           ],
         },
       ],
