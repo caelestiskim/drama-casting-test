@@ -2,7 +2,7 @@
 
 얼굴 사진 1장을 업로드하면 OpenAI Vision API로 얼굴 분위기를 분석하고, 어울리는 한국 드라마 캐릭터 타입을 추천하는 웹앱입니다.
 
-Live site: https://drama-casting-test.pages.dev
+Live site: https://dramacastingtest.site
 
 ## 서비스 개요
 
