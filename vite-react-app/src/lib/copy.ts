@@ -635,7 +635,7 @@ export const pageCopy = {
             "This Service uses Google AdSense, which uses cookies to serve ads based on your prior visits to this and other websites",
             "You can opt out of personalized advertising at any time via Google Ads Settings (adssettings.google.com)",
             "You may also disable cookies in your browser settings, though some Service features may not function correctly as a result",
-            "We do not currently use Google Analytics or similar tracking tools. This policy will be updated if that changes",
+            "We use Google Analytics to understand aggregate Service traffic and improve the user experience",
           ],
         },
         {
