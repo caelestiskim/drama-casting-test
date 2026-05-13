@@ -321,6 +321,7 @@ export const pageCopy = {
           title: "2. 환불이 가능한 경우",
           bullets: [
             "결제는 완료되었으나 서비스 오류로 프리미엄 결과가 정상적으로 제공되지 않은 경우 전액 환불을 요청할 수 있습니다.",
+            "결제 완료 후 결제 검증 오류로 프리미엄 잠금이 해제되지 않거나 결과 페이지에 접근할 수 없는 경우, 먼저 접근 복구를 지원하며 복구가 불가능하면 환불을 요청할 수 있습니다.",
             "중복 결제가 발생한 경우 중복 결제분에 대해 환불을 요청할 수 있습니다.",
             "환불 요청은 결제일로부터 7일 이내에 결제 이메일, 결제 시각, 가능한 경우 Polar 영수증 또는 거래 ID를 포함해 caelestis@empas.com으로 보내주세요.",
           ],
@@ -329,6 +330,8 @@ export const pageCopy = {
           title: "3. 환불이 제한되는 경우",
           bullets: [
             "프리미엄 결과가 정상적으로 화면에 표시된 이후에는 디지털 콘텐츠가 즉시 제공된 것으로 보아 단순 변심 환불이 제한됩니다.",
+            "결과 화면은 제공되었으나 이메일 리포트 발송, 공유 링크 열람, 이미지 저장 등 부가 기능만 실패한 경우 즉시 환불 사유가 아닐 수 있으며, 재발송·링크 재생성·기술 지원을 먼저 제공합니다.",
+            "메일 주소 오기재, 스팸함 분류, 일시적인 메일 수신 지연, 이용자 브라우저 또는 네트워크 문제로 인한 접근 실패는 환불 사유에 해당하지 않을 수 있습니다.",
             "이용자의 네트워크 환경, 브라우저 설정, 기기 문제, 잘못된 사진 선택 등 서비스 외부 요인으로 인한 불만족은 환불 사유에 해당하지 않을 수 있습니다.",
             "결과는 엔터테인먼트 목적의 AI 추천이며, 특정 배우와 닮음 여부나 결과 만족도를 보장하지 않습니다.",
           ],
@@ -337,7 +340,9 @@ export const pageCopy = {
           title: "4. 처리 기간 및 문의",
           bullets: [
             "환불 요청을 받으면 영업일 기준 7일 이내에 확인 후 답변합니다.",
+            "정확한 확인을 위해 오류 화면 캡처, 결제 영수증, 사용한 이메일 주소, 발생 시각을 함께 보내주시면 더 빠르게 처리할 수 있습니다.",
             "승인된 환불은 Polar의 결제 처리 일정에 따라 원 결제 수단으로 반환됩니다.",
+            "환불이 승인되면 해당 결제에 연결된 프리미엄 결과 접근, 이메일 재발송, 공유 링크 지원이 중단될 수 있습니다.",
             "문의 이메일: caelestis@empas.com",
           ],
         },
@@ -372,6 +377,7 @@ export const pageCopy = {
             "프리미엄 결과 이용권은 결제 완료 즉시 디지털 콘텐츠(분석 결과)가 제공되는 서비스입니다.",
             "디지털 콘텐츠의 특성상, 결과가 화면에 표시된 이후에는 「전자상거래 등에서의 소비자 보호에 관한 법률」 제17조에 따라 청약 철회(환불)가 제한됩니다.",
             "단, 서비스 오류·기술적 결함으로 결과가 정상 제공되지 않은 경우 결제일로부터 7일 이내에 환불을 요청하면 전액 환불합니다.",
+            "이메일 리포트, 공유 링크, 이미지 저장 등 부가 기능의 오류는 우선 재발송·복구 지원을 제공하며, 복구가 불가능한 경우 환불 여부를 검토합니다.",
             "환불 요청: caelestis@empas.com으로 결제 내역과 함께 연락 주세요.",
             "결제는 Polar 플랫폼을 통해 처리되며, Polar의 이용약관(polar.sh/legal)도 함께 적용됩니다.",
           ],
@@ -715,6 +721,7 @@ export const pageCopy = {
           title: "2. Eligible Refunds",
           bullets: [
             "If payment succeeds but the Service fails to deliver the premium result due to a technical error or system fault, you may request a full refund.",
+            "If payment succeeds but payment verification fails, premium access does not unlock, or the result page cannot be accessed, we will first try to restore access. If restoration is not possible, you may request a refund.",
             "If a duplicate payment occurs, you may request a refund for the duplicate charge.",
             "Refund requests must be sent within 7 days of payment to caelestis@empas.com and should include the payment email, payment time, and, if available, the Polar receipt or transaction ID.",
           ],
@@ -723,6 +730,8 @@ export const pageCopy = {
           title: "3. Non-Refundable Cases",
           bullets: [
             "Once the premium result has been successfully displayed, the digital content is considered delivered and refunds for change of mind are generally not available.",
+            "If the result was delivered but an add-on feature such as email report delivery, share link access, or image saving fails, this may not qualify for an immediate refund. We will first provide resend, link regeneration, or technical support.",
+            "Incorrect email addresses, spam filtering, temporary email delivery delays, browser issues, or user network problems may not qualify for a refund.",
             "Issues caused by the user's network, browser settings, device environment, or photo choice may not qualify for a refund.",
             "Results are AI-generated entertainment recommendations. The Service does not guarantee a specific actor match, a specific character outcome, or user satisfaction with the result.",
           ],
@@ -731,7 +740,9 @@ export const pageCopy = {
           title: "4. Processing Time and Contact",
           bullets: [
             "We will review refund requests and respond within 7 business days.",
+            "To help us verify the issue faster, please include screenshots of the error, the payment receipt, the email address used, and the approximate time of the issue.",
             "Approved refunds are returned to the original payment method according to Polar's payment processing timeline.",
+            "Once a refund is approved, premium result access, email resend support, and share link support connected to that purchase may be discontinued.",
             "Contact: caelestis@empas.com",
           ],
         },
@@ -765,6 +776,7 @@ export const pageCopy = {
             "Premium results are a digital content service — the analysis is delivered immediately upon successful payment",
             "Because digital content is provided instantly upon purchase, refunds are generally not available once the result has been displayed, in accordance with applicable consumer protection law",
             "Exception: if the Service fails to deliver a result due to a technical error or system fault, you may request a full refund within 7 days of payment by contacting caelestis@empas.com with your transaction details",
+            "Errors affecting add-on features such as email reports, share links, or image saving will first be handled through resend or restoration support. If restoration is not possible, refund eligibility may be reviewed",
             "All payments are processed by Polar. Polar's Terms of Service (polar.sh/legal) also apply to your purchase",
           ],
         },
@@ -1107,6 +1119,7 @@ export const pageCopy = {
           title: "2. 返金可能な場合",
           bullets: [
             "決済が完了したにもかかわらず、本サービスの技術的エラーまたはシステム不具合によりプレミアム結果が正常に提供されなかった場合、全額返金を申請できます",
+            "決済完了後に決済確認エラーによりプレミアムアクセスが解除されない場合、または結果ページにアクセスできない場合は、まずアクセス復旧をサポートし、復旧できない場合に返金を申請できます",
             "重複決済が発生した場合、重複分の返金を申請できます",
             "返金申請は決済日から7日以内に、決済メールアドレス、決済時刻、可能であればPolarの領収書または取引IDを添えて caelestis@empas.com までご連絡ください",
           ],
@@ -1115,6 +1128,8 @@ export const pageCopy = {
           title: "3. 返金が制限される場合",
           bullets: [
             "プレミアム結果が正常に表示された後は、デジタルコンテンツが提供済みとみなされ、単純な心変わりによる返金は原則としてできません",
+            "結果自体は提供されたものの、メールレポート送信、共有リンクの閲覧、画像保存などの付加機能のみで不具合が発生した場合、直ちに返金対象とはならない場合があります。まず再送信、リンク再生成、技術サポートを提供します",
+            "メールアドレスの入力誤り、迷惑メール振り分け、一時的なメール受信遅延、ブラウザやネットワーク環境に起因するアクセス失敗は返金対象外となる場合があります",
             "利用者のネットワーク環境、ブラウザ設定、端末環境、写真選択に起因する問題は返金対象外となる場合があります",
             "結果はAIによるエンタメ向けおすすめです。特定の俳優との一致、特定のキャラクター結果、利用者の満足度を保証するものではありません",
           ],
@@ -1123,7 +1138,9 @@ export const pageCopy = {
           title: "4. 処理期間とお問い合わせ",
           bullets: [
             "返金申請を受領後、営業日7日以内に確認して返信します",
+            "迅速な確認のため、エラー画面のスクリーンショット、決済領収書、使用したメールアドレス、発生時刻を添えてご連絡ください",
             "承認された返金は、Polarの決済処理スケジュールに従って元の決済手段へ返金されます",
+            "返金が承認された場合、その購入に紐づくプレミアム結果アクセス、メール再送信、共有リンクのサポートは終了することがあります",
             "お問い合わせ：caelestis@empas.com",
           ],
         },
@@ -1158,6 +1175,7 @@ export const pageCopy = {
             "プレミアム結果は、決済完了と同時にデジタルコンテンツ（分析結果）が提供されるサービスです",
             "デジタルコンテンツの性質上、結果が画面に表示された後は、消費者保護に関する法令に基づき、原則として返金はお受けできません",
             "ただし、本サービスの技術的な不具合・システム障害により結果が正常に提供されなかった場合は、決済日から7日以内にご連絡いただければ全額返金いたします",
+            "メールレポート、共有リンク、画像保存など付加機能の不具合については、まず再送信または復旧サポートを行い、復旧できない場合に返金可否を検討します",
             "返金のご依頼：caelestis@empas.com に決済情報とともにご連絡ください",
             "決済はPolarプラットフォームを通じて処理され、Polarの利用規約（polar.sh/legal）も適用されます",
           ],
