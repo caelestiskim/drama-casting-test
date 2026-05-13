@@ -14,6 +14,11 @@ import {
 } from "@/lib/upload-storage";
 import type { FaceValidationResult, GenderPreference } from "@/types/result";
 
+const MAX_SOURCE_IMAGE_BYTES = 25 * 1024 * 1024;
+const MAX_COMPRESSED_EDGE = 1280;
+const TARGET_COMPRESSED_BYTES = 900 * 1024;
+const MIN_JPEG_QUALITY = 0.68;
+
 function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -40,6 +45,44 @@ function loadImage(dataUrl: string) {
   });
 }
 
+function canvasToDataUrl(canvas: HTMLCanvasElement, quality: number) {
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
+async function compressImageDataUrl(dataUrl: string) {
+  const image = await loadImage(dataUrl);
+  const scale = Math.min(1, MAX_COMPRESSED_EDGE / Math.max(image.naturalWidth, image.naturalHeight));
+  const width = Math.max(1, Math.round(image.naturalWidth * scale));
+  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error("Failed to prepare image canvas.");
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, width, height);
+  context.drawImage(image, 0, 0, width, height);
+
+  let quality = 0.86;
+  let compressed = canvasToDataUrl(canvas, quality);
+
+  while (compressed.length > TARGET_COMPRESSED_BYTES * 1.34 && quality > MIN_JPEG_QUALITY) {
+    quality = Math.max(MIN_JPEG_QUALITY, quality - 0.06);
+    compressed = canvasToDataUrl(canvas, quality);
+  }
+
+  return compressed;
+}
+
+async function compressImageFile(file: File) {
+  const dataUrl = await readFileAsDataUrl(file);
+  return compressImageDataUrl(dataUrl);
+}
+
 export function UploadPanel({ locale }: { locale: Locale }) {
   const navigate = useNavigate();
   const copy = getCopy(locale);
@@ -62,7 +105,7 @@ export function UploadPanel({ locale }: { locale: Locale }) {
   const trustChips = [
     locale === "ko" ? "무료" : locale === "ja" ? "無料" : "Free",
     "JPG · PNG · HEIC",
-    "10MB",
+    locale === "ko" ? "자동 압축" : locale === "ja" ? "自動圧縮" : "Auto-compress",
     locale === "ko"
       ? "사진 저장 안 함"
       : locale === "ja"
@@ -148,6 +191,7 @@ export function UploadPanel({ locale }: { locale: Locale }) {
       }
     } catch (error) {
       console.error(error);
+      clearStoredUpload();
       setValidation({
         canProceed: false,
         status: "error",
@@ -184,45 +228,16 @@ export function UploadPanel({ locale }: { locale: Locale }) {
     if (!file) return;
     if (!file.type.startsWith("image/")) return;
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > MAX_SOURCE_IMAGE_BYTES) {
       setValidation({
         canProceed: false,
         status: "error",
         message:
           locale === "ko"
-            ? "10MB 이하 사진으로 다시 올려 주세요."
+            ? "25MB 이하 사진으로 다시 올려 주세요."
             : locale === "ja"
-              ? "10MB以下の写真で再度アップロードしてください。"
-              : "Please upload a photo under 10MB.",
-        warnings: [],
-        faceCount: 0,
-        confidence: 0,
-        isFrontal: false,
-      });
-      return;
-    }
-
-    const dataUrl = await readFileAsDataUrl(file);
-    await processImage(dataUrl, file.name);
-  };
-
-  const handleSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      setValidation({
-        canProceed: false,
-        status: "error",
-        message:
-          locale === "ko"
-            ? "10MB 이하 사진으로 다시 올려 주세요."
-            : locale === "ja"
-              ? "10MB以下の写真でアップロードし直してください。"
-              : "Please upload a photo under 10MB.",
+              ? "25MB以下の写真で再度アップロードしてください。"
+              : "Please upload a photo under 25MB.",
         warnings: [],
         faceCount: 0,
         confidence: 0,
@@ -232,10 +247,63 @@ export function UploadPanel({ locale }: { locale: Locale }) {
     }
 
     try {
-      const dataUrl = await readFileAsDataUrl(file);
+      const dataUrl = await compressImageFile(file);
       await processImage(dataUrl, file.name);
     } catch (error) {
       console.error(error);
+      clearStoredUpload();
+      setValidation({
+        canProceed: false,
+        status: "error",
+        message: t.filePrepError,
+        warnings: [],
+        faceCount: 0,
+        confidence: 0,
+        isFrontal: false,
+      });
+    }
+  };
+
+  const handleSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > MAX_SOURCE_IMAGE_BYTES) {
+      setValidation({
+        canProceed: false,
+        status: "error",
+        message:
+          locale === "ko"
+            ? "25MB 이하 사진으로 다시 올려 주세요."
+            : locale === "ja"
+              ? "25MB以下の写真でアップロードし直してください。"
+              : "Please upload a photo under 25MB.",
+        warnings: [],
+        faceCount: 0,
+        confidence: 0,
+        isFrontal: false,
+      });
+      return;
+    }
+
+    try {
+      const dataUrl = await compressImageFile(file);
+      await processImage(dataUrl, file.name);
+    } catch (error) {
+      console.error(error);
+      clearStoredUpload();
+      setValidation({
+        canProceed: false,
+        status: "error",
+        message: t.filePrepError,
+        warnings: [],
+        faceCount: 0,
+        confidence: 0,
+        isFrontal: false,
+      });
     }
 
     event.target.value = "";
@@ -292,7 +360,7 @@ export function UploadPanel({ locale }: { locale: Locale }) {
     }
 
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    const dataUrl = await compressImageDataUrl(canvas.toDataURL("image/jpeg", 0.92));
 
     closeCamera();
     await processImage(dataUrl, `camera-shot-${Date.now()}.jpg`);
