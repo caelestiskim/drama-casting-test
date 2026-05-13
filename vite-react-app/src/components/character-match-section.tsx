@@ -828,10 +828,9 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
       fileName,
       result,
       genderPreference: genderPreference ?? undefined,
-      imageDataUrl: previewUrl ?? undefined,
     });
     return `${window.location.origin}/${locale}/result?share=${encodeURIComponent(snapshot)}`;
-  }, [fileName, genderPreference, locale, previewUrl, result]);
+  }, [fileName, genderPreference, locale, result]);
 
   const sendReportEmail = useCallback(async () => {
     if (!verifiedSessionId || !result || !copy || !references) return;
