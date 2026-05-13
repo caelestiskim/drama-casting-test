@@ -56,9 +56,30 @@ function normalizeLocale(locale?: Locale): Locale {
   return locale === "en" || locale === "ja" ? locale : "ko";
 }
 
+function getString(value: unknown) {
+  return typeof value === "string" ? value : null;
+}
+
+function extractCustomerEmail(session: Record<string, unknown>) {
+  const direct =
+    getString(session.customer_email) ??
+    getString(session.customerEmail) ??
+    getString(session.email);
+
+  if (direct) return direct;
+
+  const customer = session.customer;
+  if (customer && typeof customer === "object") {
+    const record = customer as Record<string, unknown>;
+    return getString(record.email) ?? getString(record.customer_email);
+  }
+
+  return null;
+}
+
 async function verifyPaidSession(sessionId: string, env: Env) {
   const token = env.POLAR_ACCESS_TOKEN;
-  if (!token) return false;
+  if (!token) return { isPaid: false, customerEmail: null };
 
   const apiBase = env.POLAR_API_BASE ?? "https://sandbox-api.polar.sh";
   const res = await fetch(`${apiBase}/v1/checkouts/${encodeURIComponent(sessionId)}`, {
@@ -67,12 +88,15 @@ async function verifyPaidSession(sessionId: string, env: Env) {
 
   if (!res.ok) {
     console.error("[send-report] Polar verification failed:", res.status);
-    return false;
+    return { isPaid: false, customerEmail: null };
   }
 
   const session = (await res.json()) as Record<string, unknown>;
   const status = (session.status as string | undefined) ?? "";
-  return PAID_STATUSES.has(status);
+  return {
+    isPaid: PAID_STATUSES.has(status),
+    customerEmail: extractCustomerEmail(session),
+  };
 }
 
 function labels(locale: Locale) {
@@ -226,12 +250,8 @@ export async function onRequestPost(context: {
 
   try {
     const body = (await request.json()) as SendReportBody;
-    const email = String(body.email ?? "").trim();
     const sessionId = String(body.sessionId ?? "").trim();
 
-    if (!isValidEmail(email)) {
-      return json({ error: "Invalid email address" }, 400);
-    }
     if (!sessionId) {
       return json({ error: "Missing paid session" }, 400);
     }
@@ -239,9 +259,16 @@ export async function onRequestPost(context: {
       return json({ error: "Missing report" }, 400);
     }
 
-    const isPaid = await verifyPaidSession(sessionId, env);
-    if (!isPaid) {
+    const verification = await verifyPaidSession(sessionId, env);
+    if (!verification.isPaid) {
       return json({ error: "Payment is not verified" }, 402);
+    }
+
+    const requestedEmail = String(body.email ?? "").trim();
+    const email = requestedEmail || verification.customerEmail || "";
+
+    if (!isValidEmail(email)) {
+      return json({ error: "Customer email is not available" }, 400);
     }
 
     const locale = normalizeLocale(body.locale);
@@ -269,7 +296,7 @@ export async function onRequestPost(context: {
       return json({ error: "Failed to send email" }, 502);
     }
 
-    return json({ ok: true });
+    return json({ ok: true, email });
   } catch (error) {
     console.error("[send-report]", error);
     return json({ error: "Failed to send report" }, 500);

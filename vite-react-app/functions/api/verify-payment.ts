@@ -10,6 +10,27 @@ function json(data: unknown, status = 200): Response {
   });
 }
 
+function getString(value: unknown) {
+  return typeof value === "string" ? value : null;
+}
+
+function extractCustomerEmail(session: Record<string, unknown>) {
+  const direct =
+    getString(session.customer_email) ??
+    getString(session.customerEmail) ??
+    getString(session.email);
+
+  if (direct) return direct;
+
+  const customer = session.customer;
+  if (customer && typeof customer === "object") {
+    const record = customer as Record<string, unknown>;
+    return getString(record.email) ?? getString(record.customer_email);
+  }
+
+  return null;
+}
+
 // GET /api/verify-payment?session_id=xxx
 export async function onRequestGet(context: {
   request: Request;
@@ -43,13 +64,14 @@ export async function onRequestGet(context: {
 
     const session = (await res.json()) as Record<string, unknown>;
     const status = (session.status as string | undefined) ?? "unknown";
+    const customerEmail = extractCustomerEmail(session);
 
     const PAID_STATUSES = new Set(["confirmed", "succeeded", "paid"]);
     const isPaid = PAID_STATUSES.has(status);
 
     console.log("[verify-payment] checkout id:", sessionId, "| status:", status, "| isPaid:", isPaid);
 
-    return json({ isPaid, status });
+    return json({ isPaid, status, customerEmail });
   } catch (err) {
     console.error("[verify-payment]", err);
     return json({ isPaid: false });
