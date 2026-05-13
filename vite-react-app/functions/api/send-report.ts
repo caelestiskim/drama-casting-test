@@ -110,7 +110,7 @@ function labels(locale: Locale) {
       supports: "Supporting character matches",
       works: "Drama mood references",
       actors: "Actor mood references",
-      share: "Open your shareable result",
+      share: "Open your premium result",
       notice: "Entertainment only. This is not a scientific analysis or diagnosis.",
     };
   }
@@ -124,7 +124,7 @@ function labels(locale: Locale) {
       supports: "サブキャラクター候補",
       works: "似合う作品ムード",
       actors: "俳優ムードレファレンス",
-      share: "共有用の結果を開く",
+      share: "プレミアム結果を開く",
       notice: "エンタメ目的のみ。科学的分析や診断ではありません。",
     };
   }
@@ -137,7 +137,7 @@ function labels(locale: Locale) {
     supports: "보조 캐릭터 후보",
     works: "어울리는 작품 분위기",
     actors: "배우 무드 레퍼런스",
-    share: "공유용 결과 열기",
+    share: "프리미엄 결과 열기",
     notice: "오락 목적 전용입니다. 과학적 분석이나 진단이 아닙니다.",
   };
 }

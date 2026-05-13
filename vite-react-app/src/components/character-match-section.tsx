@@ -832,6 +832,13 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
     return `${window.location.origin}/${locale}/result?share=${encodeURIComponent(snapshot)}`;
   }, [fileName, genderPreference, locale, result]);
 
+  const premiumResultUrl = useMemo(() => {
+    if (!shareUrl || !verifiedSessionId) return shareUrl;
+    const url = new URL(shareUrl);
+    url.searchParams.set("session_id", verifiedSessionId);
+    return url.toString();
+  }, [shareUrl, verifiedSessionId]);
+
   const sendReportEmail = useCallback(async () => {
     if (!verifiedSessionId || !result || !copy || !references) return;
 
@@ -886,7 +893,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
             }),
             works: references.works,
             actors: references.actors,
-            shareUrl,
+            shareUrl: premiumResultUrl,
           },
         }),
       });
@@ -920,7 +927,7 @@ export function CharacterMatchSection({ locale }: { locale: Locale }) {
             : "리포트 자동 발송에 실패했어요. 다시 시도해 주세요.",
       );
     }
-  }, [copy, locale, references, result, shareUrl, ui.headerTitle, verifiedSessionId]);
+  }, [copy, locale, premiumResultUrl, references, result, ui.headerTitle, verifiedSessionId]);
 
   useEffect(() => {
     if (!isPaid || !paymentChecked || phase !== "done" || !verifiedSessionId || !result || !copy || !references) {
